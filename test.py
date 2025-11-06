@@ -48,6 +48,18 @@ Ka_input = 1.04 # Коэффициент для корректировки об�
 Kj_input = 0.95 # Пример
 Ktr_input = 1.15 # Пример из расчета
 
+# --- Сохранение CSV ---
+csv_table_input = generate_input_table_csv(
+    materials_main_example, materials_purchased_example,
+    prices_example, fuel_energy_example, labor_example, rates_example,
+    volume_base_example, Ka_input, Kj_input, Ktr_input
+)
+csv_input_filename = "input_data_table.csv"
+with open(csv_input_filename, 'w', encoding='utf-8', newline='') as csvfile:
+    csvfile.write(csv_table_input)
+
+print(f"CSV таблица исходных данных сохранена в файл: {csv_input_filename}")
+
 # --- Выполнение основной логики ---
 print("Исходные данные:")
 print(f"Ka = {Ka_input}, Kj = {Kj_input}, Ktr = {Ktr_input}")

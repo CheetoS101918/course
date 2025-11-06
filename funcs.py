@@ -669,3 +669,102 @@ def calculate_product_volumes(structure_data_A, structure_data_B):
     Q_p = Q_n + Q_t - Q_k
 
     return Q_t, Q_p, Q_A, Q_B, price_A, price_B
+
+
+def generate_input_table_csv(materials_main, materials_purchased, prices, fuel_energy, labor, rates, volume_base, Ka, Kj, Ktr):
+    """
+    Генерирует CSV строку для Таблицы 1 (Исходные данные) по образцу из el.docx.
+    """
+    output = io.StringIO()
+    writer = csv.writer(output, delimiter=';', quoting=csv.QUOTE_MINIMAL)
+
+    # Заголовок таблицы
+    writer.writerow(["№", "Показатели", "Номер дополнения", "Ед. измерения", "Изделие А", "Изделие Б"])
+
+    # --- Структура данных для сопоставления ---
+    # Сопоставляем названия из ваших словарей с описанием из таблицы методички
+    # Формат: ("Описание из таблицы", "Ед. изм.", "Номер дополнения", "Ключ для A", "Ключ для B")
+    # Для материалов с типом "material", ключ - это кортеж (значение_расхода, значение_отходов)
+    # Для материалов с типом "fixed", ключ - это просто значение
+    # Цены, топливо/энергия, трудоемкость, ставки, проценты, объемы - отдельно
+
+    # 1. Основные материалы
+    writer.writerow(["1", "Основные материалы", "2", "", "", ""])
+    writer.writerow(["1.1", "Стальной прокат:", "", "", "", ""])
+    steel_data = materials_main.get("стальной прокат", {})
+    writer.writerow(["", "- расходы", "", "т", steel_data.get("A", {}).get("rasxod", ""), steel_data.get("B", {}).get("rasxod", "")])
+    writer.writerow(["", "- отходы", "", "т", steel_data.get("A", {}).get("otxod", ""), steel_data.get("B", {}).get("otxod", "")])
+
+    writer.writerow(["1.2", "Трубы стальные:", "", "", "", ""])
+    pipes_data = materials_main.get("трубы стальные", {})
+    writer.writerow(["", "- расходы", "", "т", pipes_data.get("A", {}).get("rasxod", ""), pipes_data.get("B", {}).get("rasxod", "")])
+    writer.writerow(["", "- отходы", "", "т", pipes_data.get("A", {}).get("otxod", ""), pipes_data.get("B", {}).get("otxod", "")])
+
+    writer.writerow(["1.3", "Прокат цветных металлов", "", "руб", materials_main.get("прокат цветных металлов", {}).get("A"), materials_main.get("прокат цветных металлов", {}).get("B")])
+    writer.writerow(["1.4", "Другие материалы", "", "руб", materials_main.get("другие материалы", {}).get("A"), materials_main.get("другие материалы", {}).get("B")])
+
+    # 2. Покупные полуфабрикаты (отливки)
+    writer.writerow(["2", "Покупные полуфабрикаты (отливки):", "2", "", "", ""])
+    writer.writerow(["2.1", "черных металлов", "", "", "", ""])
+    cast_iron_data = materials_purchased.get("отливки черных металлов", {})
+    writer.writerow(["", "- расходы", "", "т", cast_iron_data.get("A", {}).get("rasxod", ""), cast_iron_data.get("B", {}).get("rasxod", "")])
+    writer.writerow(["", "- отходы", "", "т", cast_iron_data.get("A", {}).get("otxod", ""), cast_iron_data.get("B", {}).get("otxod", "")])
+
+    writer.writerow(["2.2", "цветных металлов", "", "", "", ""])
+    cast_alloy_data = materials_purchased.get("отливки цветных металлов", {})
+    writer.writerow(["", "- расходы", "", "т", cast_alloy_data.get("A", {}).get("rasxod", ""), cast_alloy_data.get("B", {}).get("rasxod", "")])
+    writer.writerow(["", "- отходы", "", "т", cast_alloy_data.get("A", {}).get("otxod", ""), cast_alloy_data.get("B", {}).get("otxod", "")])
+
+    # 3. Покупные комплектующие изделия
+    writer.writerow(["3", "покупные комплектующие изделия", "3", "руб", materials_purchased.get("покупные комплектующие изделия", {}).get("A"), materials_purchased.get("покупные комплектующие изделия", {}).get("B")])
+
+    # 4. Цены
+    writer.writerow(["4", "Цена стального проката", "4", "руб /т", prices.get("стальной прокат_материал"), prices.get("стальной прокат_материал")])
+    writer.writerow(["5", "Цена стальных труб", "4", "руб /т", prices.get("трубы стальные_материал"), prices.get("трубы стальные_материал")])
+    writer.writerow(["6", "Цена отливок:", "4", "", "", ""])
+    writer.writerow(["", "-черных металлов", "", "руб /т", prices.get("отливки черных металлов_материал"), prices.get("отливки черных металлов_материал")])
+    writer.writerow(["", "-цветных металлов", "", "руб /т", prices.get("отливки цветных металлов_материал"), prices.get("отливки цветных металлов_материал")])
+
+    # 7. Цены отходов
+    writer.writerow(["7", "Цена отходов:", "4", "", "", ""])
+    writer.writerow(["", "-стального проката", "", "руб /т", prices.get("стальной прокат_отходы"), prices.get("стальной прокат_отходы")])
+    writer.writerow(["", "-труб стальных", "", "руб /т", prices.get("трубы стальные_отходы"), prices.get("трубы стальные_отходы")])
+    writer.writerow(["", "-отливок черных металлов", "", "руб /т", prices.get("отливки черных металлов_отходы"), prices.get("отливки черных металлов_отходы")])
+    writer.writerow(["", "-отливок цветных металлов", "", "руб /т", prices.get("отливки цветных металлов_отходы"), prices.get("отливки цветных металлов_отходы")])
+
+    # 8. Топливо и энергия
+    writer.writerow(["8", "Топливо и энергия на технологические потребности", "5", "%", fuel_energy.get("A"), fuel_energy.get("B")])
+
+    # 9. Суммарная трудоемкость
+    writer.writerow(["9", "Суммарная трудоемкость изделия", "6", "н-час", labor.get("labor_hours", {}).get("A"), labor.get("labor_hours", {}).get("B")])
+
+    # 10. Часовая тарифная ставка
+    writer.writerow(["10", "Часовая тарифная ставка", "6", "руб", labor.get("hourly_rate", {}).get("A"), labor.get("hourly_rate", {}).get("B")])
+
+    # 11. Дополнительная зарплата
+    writer.writerow(["11", "Дополнительная зарплата", "7", "%", rates.get("доп_зарплата"), rates.get("доп_зарплата")])
+
+    # 12. Отчисление на социальное страхование
+    writer.writerow(["12", "Отчисление на социальное страхование", "7", "%", rates.get("отчисления"), rates.get("отчисления")])
+
+    # 13. РСЭО
+    writer.writerow(["13", "Расходы на содержание и эксплуатацию оборудования", "7", "%", rates.get("РСЭО"), rates.get("РСЭО")])
+
+    # 14. ОПР
+    writer.writerow(["14", "Общепроизводственные расходы", "7", "%", rates.get("ОПР"), rates.get("ОПР")])
+
+    # 15. ОХР
+    writer.writerow(["15", "Общехозяйственные расходы", "7", "%", rates.get("ОХР"), rates.get("ОХР")])
+
+    # 16. ВПР
+    writer.writerow(["16", "Внепроизводственные расходы", "7", "%", rates.get("ВПР"), rates.get("ВПР")])
+
+    # 17. Норматив рентабельности
+    writer.writerow(["17", "Норматив рентабельности к себестоимости", "7", "%", rates.get("рентабельность"), rates.get("рентабельность")])
+
+    # 18. Годовой объем производства (базовый)
+    writer.writerow(["18", "Годовой объем производства", "1", "шт", volume_base.get("A"), volume_base.get("B")])
+
+    csv_content = output.getvalue()
+    output.close()
+    return csv_content
