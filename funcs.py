@@ -1,5 +1,6 @@
 import csv
 import io
+import json
 
 def calculate_material_costs(norma_rasxoda, norma_otxoda, price_mat, price_otxod, Ktr=1.0):
     """
@@ -673,7 +674,7 @@ def calculate_product_volumes(structure_data_A, structure_data_B):
 
 def generate_input_table_csv(materials_main, materials_purchased, prices, fuel_energy, labor, rates, volume_base, Ka, Kj, Ktr):
     """
-    Генерирует CSV строку для Таблицы 1 (Исходные данные) по образцу из el.docx.
+    Генерирует CSV строку для Таблицы 1 (Исходные данные)
     """
     output = io.StringIO()
     writer = csv.writer(output, delimiter=';', quoting=csv.QUOTE_MINIMAL)
@@ -763,8 +764,97 @@ def generate_input_table_csv(materials_main, materials_purchased, prices, fuel_e
     writer.writerow(["17", "Норматив рентабельности к себестоимости", "7", "%", rates.get("рентабельность"), rates.get("рентабельность")])
 
     # 18. Годовой объем производства (базовый)
-    writer.writerow(["18", "Годовой объем производства", "1", "шт", volume_base.get("A"), volume_base.get("B")])
+    writer.writerow(["18", "Годовой объем производства", "1", "шт", int(volume_base.get("A") * Ka), int(volume_base.get("B") * Ka)])
 
     csv_content = output.getvalue()
     output.close()
     return csv_content
+
+
+def save_structure_table_to_json(structure_data_A, structure_data_B, filename="sebestoimost_structure.json"):
+    """
+    Сохраняет итоговую таблицу структуры себестоимости в формате JSON.
+
+    Args:
+        structure_data_A (dict): Словарь с данными для изделия А (из generate_output_for_item).
+        structure_data_B (dict): Словарь с данными для изделия Б (из generate_output_for_item).
+        filename (str): Имя файла для сохранения JSON (по умолчанию "sebestoimost_structure.json").
+    """
+    # Общая годовая себестоимость для расчета структуры
+    total_A_annual = structure_data_A["Годовой_Сп"] / 1000 # в тыс.руб
+    total_B_annual = structure_data_B["Годовой_Сп"] / 1000 # в тыс.руб
+    total_combined_annual = total_A_annual + total_B_annual
+
+    # Данные для строк таблицы
+    rows = [
+        ("1. Основные материалы за вычетом возвратных отходов", "Единица_Сом", "Годовой_Сом"),
+        ("2. Покупные полуфабрикаты и комплектующие изделия", "Единица_Спф_Ском", "Годовой_Спф_Ском"),
+        ("3. Топливо и энергия на технологические потребности", "Единица_Стэ", "Годовой_Стэ"),
+        ("4. Основная заработная плата производственных рабочих", "Единица_Сосн", "Годовой_Сосн"),
+        ("5. Дополнительная заработная плата производственных рабочих", "Единица_Сдоп", "Годовой_Сдоп"),
+        ("6. Отчисление в фонды социальных мероприятий", "Единица_Ссоц", "Годовой_Ссоц"),
+        ("7. Расходы по содержанию и эксплуатации оборудования", "Единица_Рсэо", "Годовой_Рсэо"),
+        ("8. Общепроизводственные расходы", "Единица_Роп", "Годовой_Роп"),
+        ("9. Общехозяйственные расходы", "Единица_Рох", "Годовой_Рох"),
+        ("ВСЕГО производственная себестоимость", "Единица_Спр", "Годовой_Спр"),
+        ("10. Внепроизводственные расходы", "Единица_Свп", "Годовой_Свп"),
+        ("ВСЕГО полная (коммерческая) себестоимость", "Единица_Сп", "Годовой_Сп"),
+        ("11. Прибыль", "Единица_Прибыль", "Годовой_Прибыль"),
+        ("12. Оптовая (отпускная) цена", "Оптовая_цена", None) # Для оптовой цены нет годового выпуска
+    ]
+
+    # Список для хранения данных JSON
+    json_data = []
+
+    for row_name, unit_key, annual_key in rows:
+        # Значения для изделия А
+        a_unit_val = structure_data_A[unit_key]
+        if annual_key is not None:
+            a_annual_val = structure_data_A[annual_key] / 1000 # в тыс.руб
+        else:
+            a_annual_val = None
+
+        # Значения для изделия Б
+        b_unit_val = structure_data_B[unit_key]
+        if annual_key is not None:
+            b_annual_val = structure_data_B[annual_key] / 1000 # в тыс.руб
+        else:
+            b_annual_val = None
+
+        # Сумма годового выпуска для этой строки (А + Б)
+        combined_annual_val = None
+        if annual_key is not None:
+            combined_annual_val = (structure_data_A[annual_key] + structure_data_B[annual_key]) / 1000 # в тыс.руб
+
+        # Удельный вес (структура расходов) - рассчитывается от общей себестоимости ВСЕЙ НОМЕНКЛАТУРЫ
+        perc_combined = 0
+        if annual_key is not None and total_combined_annual > 0: # Только для статей с годовым значением и если общая себестоимость > 0
+            # Используем вашу функцию calculate_structure_percentage
+            perc_combined = calculate_structure_percentage(combined_annual_val, total_combined_annual) # combined_annual_val уже в тыс.руб
+        elif annual_key is None: # Для строки "Оптовая цена" структура не рассчитывается
+             perc_combined = None # или оставить пустым
+
+        # Формируем словарь данных JSON
+        row_data_json = {
+            "Наименование статей расходов": row_name,
+            "Изделие А на единицу, руб": round(a_unit_val, 2),
+            "Изделие А на годовой выпуск, тыс.руб.": round(a_annual_val, 2) if a_annual_val is not None else None,
+            "Изделие Б на единицу, руб": round(b_unit_val, 2),
+            "Изделие Б на годовой выпуск, тыс.руб.": round(b_annual_val, 2) if b_annual_val is not None else None,
+            "Себестоимость годового выпуска продукции, тыс.руб.": round(combined_annual_val, 2) if combined_annual_val is not None else None,
+            "Структура расходов,%": round(perc_combined, 2) if isinstance(perc_combined, (int, float)) else None
+        }
+        json_data.append(row_data_json)
+
+    # Сохранение JSON
+    with open(filename, 'w', encoding='utf-8') as jsonfile:
+        json.dump(json_data, jsonfile, indent=4, ensure_ascii=False) # indent для красивого форматирования, ensure_ascii=False для кириллицы
+
+    print(f"\nJSON таблица структуры себестоимости сохранена в файл: {filename}")
+
+
+# --- Пример вызова функции в конце вашего основного скрипта ---
+# (Предполагается, что structure_data_A и structure_data_B уже получены)
+# structure_data_A = ...
+# structure_data_B = ...
+# save_structure_table_to_json(structure_data_A, structure_data_B)

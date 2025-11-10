@@ -1,19 +1,17 @@
 from funcs import *
 
-# --- 4. Основная логика скрипта ---
-
 # Пример исходных данных для Варианта 3
 materials_main_example = {
-    "стальной прокат": {"type": "material", "A": {"rasxod": 0.62, "otxod": 0.1116}, "B": {"rasxod": 0.07, "otxod": 0.007}},
-    "трубы стальные": {"type": "material", "A": {"rasxod": 0.06, "otxod": 0.0042}, "B": {"rasxod": 0.05, "otxod": 0.004}},
-    "прокат цветных металлов": {"type": "fixed", "A": 2500, "B": 3200},
-    "другие материалы": {"type": "fixed", "A": 800, "B": 950}
+    "стальной прокат": {"type": "material", "A": {"rasxod": 0.45, "otxod": 0.0675}, "B": {"rasxod": 0.05, "otxod": 0.005}},
+    "трубы стальные": {"type": "material", "A": {"rasxod": 0.04, "otxod": 0.0028}, "B": {"rasxod": 0.005, "otxod": 0.0003}},
+    "прокат цветных металлов": {"type": "fixed", "A": 2900, "B": 3000},
+    "другие материалы": {"type": "fixed", "A": 1800, "B": 1700}
 }
 
 materials_purchased_example = {
-    "отливки черных металлов": {"type": "material", "A": {"rasxod": 2.6, "otxod": 0.468}, "B": {"rasxod": 2.9, "otxod": 0.464}},
-    "отливки цветных металлов": {"type": "material", "A": {"rasxod": 0.32, "otxod": 0.0736}, "B": {"rasxod": 0.28, "otxod": 0.0504}},
-    "покупные комплектующие изделия": {"type": "fixed", "A": 136800, "B": 118300}
+    "отливки черных металлов": {"type": "material", "A": {"rasxod": 4.5, "otxod": 0.675}, "B": {"rasxod": 2.2, "otxod": 0.484}},
+    "отливки цветных металлов": {"type": "material", "A": {"rasxod": 0.3, "otxod": 0.075}, "B": {"rasxod": 0.25, "otxod": 0.05}},
+    "покупные комплектующие изделия": {"type": "fixed", "A": 142800, "B": 75800}
 }
 
 prices_example = {
@@ -27,25 +25,25 @@ prices_example = {
     "отливки цветных металлов_отходы": 16900,
 }
 
-fuel_energy_example = {"A": 1.6, "B": 1.2}
+fuel_energy_example = {"A": 1, "B": 0.9}
 labor_example = {
-    "labor_hours": {"A": 893.0, "B": 177.65},
+    "labor_hours": {"A": 920, "B": 157.32},
     "hourly_rate": {"A": 41.50, "B": 35.60}
 }
 rates_example = {
     "доп_зарплата": 40,
     "отчисления": 22,
-    "РСЭО": 80,
-    "ОПР": 90,
-    "ОХР": 110,
-    "ВПР": 3,
-    "рентабельность": 22
+    "РСЭО": 87,
+    "ОПР": 85,
+    "ОХР": 98,
+    "ВПР": 5,
+    "рентабельность": 20
 }
-volume_base_example = {"A": 98, "B": 65}
+volume_base_example = {"A": 195, "B": 60}
 
 # --- Входные коэффициенты ---
-Ka_input = 1.04 # Коэффициент для корректировки объема
-Kj_input = 0.95 # Пример
+Ka_input = 1.06 # Коэффициент для корректировки объема
+Kj_input = 0.92 # Пример
 Ktr_input = 1.15 # Пример из расчета
 
 # --- Сохранение CSV ---
@@ -140,3 +138,5 @@ volumes_output += "Qк – остатки готовой продукции на
 volumes_output += f"Qр = {Q_t:.2f} * 0,02 + {Q_t:.2f} - {Q_t:.2f} * 0,015 = {Q_p:.2f} тыс. руб.\n"
 
 print(volumes_output)
+
+save_structure_table_to_json(structure_data_A, structure_data_B)
