@@ -1,6 +1,8 @@
 import csv
 import io
 import json
+from typing import List, Dict, Any
+
 
 def calculate_material_costs(norma_rasxoda, norma_otxoda, price_mat, price_otxod, Ktr=1.0):
     """
@@ -144,7 +146,7 @@ def calculate_overhead_costs(base_wage, overhead_percentage):
     overhead_cost = base_wage * (overhead_percentage / 100)
     return round(overhead_cost, 2)
 
-def calculate_production_cost(material_costs, fuel_energy, basic_wage, additional_wage, social_contributions, rsuo_costs, opr_costs, oxr_costs):
+def calculate_production_cost(material_costs, fuel_energy, purchased_comp_cost, basic_wage, additional_wage, social_contributions, rsuo_costs, opr_costs, oxr_costs):
     """
     Расчет полной производственной себестоимости единицы изделия.
 
@@ -161,7 +163,7 @@ def calculate_production_cost(material_costs, fuel_energy, basic_wage, additiona
     Returns:
         float: Производственная себестоимость единицы изделия, руб.
     """
-    production_cost = (material_costs + fuel_energy + basic_wage + additional_wage +
+    production_cost = (material_costs + purchased_comp_cost + fuel_energy + basic_wage + additional_wage +
                        social_contributions + rsuo_costs + opr_costs + oxr_costs)
     return production_cost
 
@@ -396,14 +398,14 @@ def generate_output_for_item(item_name, Q_base, Ka, Ktr, data_materials, data_pr
 
     # --- Производственная себестоимость ---
     production_cost_unit = calculate_production_cost(
-        total_material_costs_unit, fuel_energy_unit, basic_wage_unit,
+        total_material_costs_unit,  total_purchased_comp_cost_unit, fuel_energy_unit, basic_wage_unit,
         additional_wage_unit, social_contributions_unit, rsuo_unit, opr_unit, oxr_unit
     )
     production_cost_annual = production_cost_unit * Q_corrected
 
     output += "ВСЕГО производственная себестоимость\n"
     output += f"На единицу:\n"
-    output += f"Спр = Сом + Стэ + Сосн + Сдоп + Ссоц + Рсэо + Роп + Рох = {total_material_costs_unit} + {fuel_energy_unit} + {basic_wage_unit} + {additional_wage_unit} + {social_contributions_unit} + {rsuo_unit} + {opr_unit} + {oxr_unit} = {format_cost(production_cost_unit)}\n"
+    output += f"Спр = Сом + (Спф+Ском) + Впер + Сосн + Сдоп + Ссоц + Рсэо + Роп + Рох = {format_cost(total_material_costs_unit)} + {fuel_energy_unit:.2f} + {basic_wage_unit:.2f} + {additional_wage_unit:.2f} + {social_contributions_unit:.2f} + {rsuo_unit:.2f} + {opr_unit:.2f} + {oxr_unit:.2f} = {format_cost(production_cost_unit)}\n"
     output += f"На годовой выпуск:\n"
     output += f"Спр = {format_cost(production_cost_unit)} * {Q_corrected} = {format_cost_annual(production_cost_annual)}\n\n"
 
@@ -424,7 +426,7 @@ def generate_output_for_item(item_name, Q_base, Ka, Ktr, data_materials, data_pr
 
     output += "ВСЕГО полная (коммерческая) себестоимость\n"
     output += f"На единицу:\n"
-    output += f"Сп = Спр + Свп = {format_cost(full_cost_unit)}\n"
+    output += f"Сп = Спр + Свп = {production_cost_unit:.2f} + {selling_cost_unit:.2f} = {format_cost(full_cost_unit)}\n"
     output += f"На годовой выпуск:\n"
     output += f"Сп = {format_cost(full_cost_unit)} * {Q_corrected} = {format_cost_annual(full_cost_annual)}\n\n"
 
@@ -852,6 +854,72 @@ def save_structure_table_to_json(structure_data_A, structure_data_B, filename="s
 
     print(f"\nJSON таблица структуры себестоимости сохранена в файл: {filename}")
 
+
+def csv_to_json_structure(csv_path: str) -> List[Dict[str, Any]]:
+    """
+    Преобразует CSV-файл с иерархической таблицей в список словарей.
+    Каждая строка с данными → словарь с иерархическими ключами.
+    """
+    result = []
+    context = {}  # main, sub
+
+    with open(csv_path, encoding='utf-8') as f:
+        reader = csv.reader(f, delimiter=';')
+
+        for row in reader:
+            # Пропускаем полностью пустые строки
+            if not any(cell.strip() for cell in row):
+                continue
+
+            # Заполняем недостающие поля
+            row += [''] * (6 - len(row))
+            num, indicator, addition_num, unit, item_a, item_b = [cell.strip() for cell in row]
+
+            # Пропускаем пустые значения
+            if not indicator and not item_a and not item_b:
+                continue
+
+            # --- Определяем тип строки ---
+            if indicator.startswith('- '):
+                # Подпункт: расходы / отходы
+                if 'main' not in context or 'sub' not in context:
+                    continue  # защита от ошибок
+                sub_type = indicator[2:].strip()
+                entry = {
+                    "№": num,
+                    "Показатель": context['main'],
+                    "Подкатегория": context['sub'],
+                    "Тип": sub_type,
+                    "Дополнение": addition_num,
+                    "Ед. измерения": unit or None,
+                    "Изделие А": item_a or None,
+                    "Изделие Б": item_b or None
+                }
+                if item_a or item_b:
+                    result.append(entry)
+
+            elif '.' in num and num.strip().endswith('.'):
+                # Подраздел: 1.1, 1.2 и т.д.
+                context['sub'] = indicator
+            elif num.isdigit() or (num and not indicator.startswith('-')) and not num.endswith('.'):
+                # Основной раздел: 1, 2, 3...
+                if indicator:
+                    context['main'] = indicator
+                    context.pop('sub', None)
+                # Для строк верхнего уровня (например, покупные изделия)
+                if item_a or item_b:
+                    entry = {
+                        "№": num,
+                        "Показатель": indicator,
+                        "Дополнение": addition_num,
+                        "Ед. измерения": unit or None,
+                        "Изделие А": item_a or None,
+                        "Изделие Б": item_b or None
+                    }
+                    result.append(entry)
+            # Иначе — заголовок или пусто, пропускаем
+
+    return result
 
 # --- Пример вызова функции в конце вашего основного скрипта ---
 # (Предполагается, что structure_data_A и structure_data_B уже получены)

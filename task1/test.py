@@ -1,4 +1,5 @@
 from funcs import *
+import pandas as pd
 
 # Пример исходных данных для Варианта 3
 materials_main_example = {
@@ -56,7 +57,10 @@ csv_input_filename = "input_data_table.csv"
 with open(csv_input_filename, 'w', encoding='utf-8', newline='') as csvfile:
     csvfile.write(csv_table_input)
 
-print(f"CSV таблица исходных данных сохранена в файл: {csv_input_filename}")
+to_js = csv_to_json_structure(csv_input_filename)
+with open("input_data_table.json", "w", encoding="utf-8") as f:
+    json.dump(to_js, f, ensure_ascii=False, indent=4)
+
 
 # --- Выполнение основной логики ---
 print("Исходные данные:")
@@ -138,5 +142,30 @@ volumes_output += "Qк – остатки готовой продукции на
 volumes_output += f"Qр = {Q_t:.2f} * 0,02 + {Q_t:.2f} - {Q_t:.2f} * 0,015 = {Q_p:.2f} тыс. руб.\n"
 
 print(volumes_output)
-
 save_structure_table_to_json(structure_data_A, structure_data_B)
+
+
+individual_volumes_data = {
+    "Изделие": "А",
+    "Годовой_объем_выпуска": Q_A,
+    "Оптовая_цена_за_единицу": round(price_A, 2),
+    "Объем_товарной_продукции_по_изделию тыс руб": round(Q_A * price_A / 1000, 2) # в тыс.руб
+}
+individual_volumes_data_B = {
+    "Изделие": "Б",
+    "Годовой_объем_выпуска": Q_B,
+    "Оптовая_цена_за_единицу": round(price_B, 2),
+    "Объем_товарной_продукции_по_изделию тыс руб": round(Q_B * price_B / 1000, 2) # в тыс.руб
+}
+other = {
+    'Qt': Q_t,
+    'Qr': Q_p
+}
+
+# Сохраняем в JSON файл (например, список из двух словарей)
+individual_volumes_json_filename = "individual_product_volumes.json"
+with open(individual_volumes_json_filename, 'w', encoding='utf-8') as jsonfile:
+    # Записываем оба изделия в один файл как список
+    json.dump([individual_volumes_data, individual_volumes_data_B, other], jsonfile, indent=4, ensure_ascii=False)
+
+print(f"\nJSON с отдельными объемами товарной продукции сохранен в файл: {individual_volumes_json_filename}")
