@@ -68,7 +68,6 @@ class EnterpriseEconomicsCalculator:
         print()
 
     def _calculate_working_capital(self):
-        """Расчёт эффективности использования оборотных средств (Таблица 10)"""
         Q_r = self.data['Q_r']
         OS_n = self.data['OS_n']
         MZ = self.data['MZ']
@@ -81,7 +80,7 @@ class EnterpriseEconomicsCalculator:
         # Длительность одного оборота
         T_ob = round(360 / K_ob, 3)
         # Материалоемкость
-        M_e = round(MZ / Q_t, 3)
+        M_e = round(sum(MZ) / Q_t, 3)
 
         self.results['table10'] = {
             'headers': ['№', 'Показатели', 'Ед. измер.', 'Значение'],
@@ -89,18 +88,20 @@ class EnterpriseEconomicsCalculator:
                 [1, 'Объем реализованной продукции', 'тыс. руб', Q_r],
                 [2, 'Норматив оборотных средств', 'тыс. руб', OS_n],
                 [3, 'Коэффициент оборачиваемости', 'руб/руб', K_ob],
-                [4, 'Время оборота', 'Дн.', T_ob],
+                [4, 'Время оборота', 'Дн.', math.ceil(T_ob)],
                 [5, 'Коэффициент закрепления (загрузки)', 'руб/руб', K_z],
                 [6, 'Материалоемкость', 'руб/руб', M_e]
             ]
         }
 
-        # Вывод в консоль
+        # Вывод в консоль с разложением МЗ
         print("=== РАСЧЕТ ТАБЛИЦЫ 10 ===")
         print(f"Коэффициент оборачиваемости (Коб) = Qр / ОСн = {Q_r} / {OS_n} = {K_ob} об")
         print(f"Коэффициент закрепления (Кз) = 1 / Коб = 1 / {K_ob} = {K_z} руб/руб")
         print(f"Длительность оборота (Тоб) = 360 / Коб = 360 / {K_ob} = {T_ob} дн")
-        print(f"Материалоемкость (МЕ) = МЗ / Qт = {MZ} / {Q_t} = {M_e} руб/руб")
+
+        mz_formula = " + ".join(str(float(comp)) for comp in MZ)
+        print(f"Материалоемкость (МЕ) = МЗ / Qт = {mz_formula} / {Q_t} = {M_e} руб/руб")
         print()
 
     def _calculate_labor_productivity(self):
