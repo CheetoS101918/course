@@ -68,7 +68,7 @@ def main():
         ]
     }
     df_initial_data = pd.DataFrame(data)
-    df_initial_data.to_csv('Исходные_данные_основные_фонды.csv', index=False, encoding='utf-8-sig')
+    df_initial_data.to_csv('Исходные_данные_основные_фонды.csv', index=False, encoding='utf-8-sig', sep=';')
     print("\nТаблица 'Исходные_данные_основные_фонды.csv' создана.")
 
     # --- 3. Промежуточные расчёты ---
