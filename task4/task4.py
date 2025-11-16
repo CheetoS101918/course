@@ -57,8 +57,8 @@ R_sl = (ceil(R_osn) + ceil(R_vsp)) * 0.04
 R_ppp = ceil(R_osn) + ceil(R_vsp) + ceil(R_sl)
 
 
-print(f"Росн  = ({ta} * {qa} + {tb} * {qb}) / ({fch} * {kvn}) = {R_osn} = {ceil(R_osn)} чел.")
-print(f"Рвсп  = {ceil(R_osn)} * 0.25 = {R_vsp} = {ceil(R_vsp)}чел.")
+print(f"Росн  = ({ta} * {qa} + {tb} * {qb}) / ({fch} * {kvn}) = {R_osn:.3f} = {ceil(R_osn)} чел.")
+print(f"Рвсп  = {ceil(R_osn)} * 0.25 = {R_vsp} = {ceil(R_vsp)} чел.")
 print(f"Рсл  = ({ceil(R_vsp)} + {ceil(R_osn)}) * 0.04 = {R_sl} = {ceil(R_sl)} чел.")
 print(f"Численность промышленно-производственного персонала ( Рппп ) определяется суммированием численности всех категорий персонала:")
 print(f"Рппп  = {ceil(R_osn)} + {ceil(R_vsp)} + {ceil(R_sl)} = {R_ppp} чел.")
