@@ -739,7 +739,7 @@ def generate_input_table_csv(materials_main, materials_purchased, prices, fuel_e
     writer.writerow(["8", "Топливо и энергия на технологические потребности", "5", "%", fuel_energy.get("A"), fuel_energy.get("B")])
 
     # 9. Суммарная трудоемкость
-    writer.writerow(["9", "Суммарная трудоемкость изделия", "6", "н-час", labor.get("labor_hours", {}).get("A"), labor.get("labor_hours", {}).get("B")])
+    writer.writerow(["9", "Суммарная трудоемкость изделия", "6", "н-час", int(labor.get("labor_hours", {}).get("A") * Kj), int(labor.get("labor_hours", {}).get("B") * Kj)])
 
     # 10. Часовая тарифная ставка
     writer.writerow(["10", "Часовая тарифная ставка", "6", "руб", labor.get("hourly_rate", {}).get("A"), labor.get("hourly_rate", {}).get("B")])
