@@ -1,19 +1,35 @@
 from funcs import *
 import pandas as pd
+import numpy as np
 
 # Пример исходных данных для Варианта 3
-materials_main_example = {
-    "стальной прокат": {"type": "material", "A": {"rasxod": 0.45, "otxod": 0.0675}, "B": {"rasxod": 0.05, "otxod": 0.005}},
-    "трубы стальные": {"type": "material", "A": {"rasxod": 0.04, "otxod": 0.0028}, "B": {"rasxod": 0.005, "otxod": 0.0003}},
-    "прокат цветных металлов": {"type": "fixed", "A": 2900, "B": 3000},
-    "другие материалы": {"type": "fixed", "A": 1800, "B": 1700}
-}
+materials_main_example = { 'стальной прокат': { 'type': 'material',
+                       'A': { 'rasxod': np.float64(0.45),
+                              'otxod': np.float64(0.0675)},
+                       'B': { 'rasxod': np.float64(0.05),
+                              'otxod': np.float64(0.005000000000000001)}},
+  'трубы стальные': { 'type': 'material',
+                      'A': { 'rasxod': np.float64(0.04),
+                             'otxod': np.float64(0.0028000000000000004)},
+                      'B': { 'rasxod': np.float64(0.005),
+                             'otxod': np.float64(0.0003)}},
+  'прокат цветных металлов': { 'type': 'fixed',
+                               'A': np.int64(2900),
+                               'B': np.int64(3000)},
+  'другие материалы': { 'type': 'fixed',
+                        'A': np.int64(1800),
+                        'B': np.int64(1700)}}
+
 
 materials_purchased_example = {
     "отливки черных металлов": {"type": "material", "A": {"rasxod": 4.5, "otxod": 0.675}, "B": {"rasxod": 2.2, "otxod": 0.484}},
     "отливки цветных металлов": {"type": "material", "A": {"rasxod": 0.3, "otxod": 0.075}, "B": {"rasxod": 0.25, "otxod": 0.05}},
     "покупные комплектующие изделия": {"type": "fixed", "A": 142800, "B": 75800}
 }
+
+
+# !!!!!!!!!!  ^^^   "покупные комплектующие изделия": {"type": "fixed", "A": 142800, "B": 75800}    !!!!!!!!!!!!  ^^^
+
 
 prices_example = {
     "стальной прокат_материал": 12800,
