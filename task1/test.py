@@ -1,19 +1,38 @@
 from funcs import *
 import pandas as pd
+import numpy as np
 
-# Пример исходных данных для Варианта 3
-materials_main_example = {
-    "стальной прокат": {"type": "material", "A": {"rasxod": 0.45, "otxod": 0.0675}, "B": {"rasxod": 0.05, "otxod": 0.005}},
-    "трубы стальные": {"type": "material", "A": {"rasxod": 0.04, "otxod": 0.0028}, "B": {"rasxod": 0.005, "otxod": 0.0003}},
-    "прокат цветных металлов": {"type": "fixed", "A": 2900, "B": 3000},
-    "другие материалы": {"type": "fixed", "A": 1800, "B": 1700}
-}
+
+materials_main_example = { 'стальной прокат': { 'type': 'material',
+                       'A': { 'rasxod': np.float64(0.38),
+                              'otxod': np.float64(0.0684)},
+                       'B': { 'rasxod': np.float64(0.061),
+                              'otxod': np.float64(0.00305)}},
+  'трубы стальные': { 'type': 'material',
+                      'A': { 'rasxod': np.float64(0.04),
+                             'otxod': np.float64(0.004)},
+                      'B': { 'rasxod': np.float64(0.015),
+                             'otxod': np.float64(0.0012)}},
+  'прокат цветных металлов': { 'type': 'fixed',
+                               'A': np.int64(3100),
+                               'B': np.int64(2700)},
+  'другие материалы': {'type': 'fixed', 'A': np.int64(700), 'B': np.int64(560)}}
 
 materials_purchased_example = {
-    "отливки черных металлов": {"type": "material", "A": {"rasxod": 4.5, "otxod": 0.675}, "B": {"rasxod": 2.2, "otxod": 0.484}},
-    "отливки цветных металлов": {"type": "material", "A": {"rasxod": 0.3, "otxod": 0.075}, "B": {"rasxod": 0.25, "otxod": 0.05}},
-    "покупные комплектующие изделия": {"type": "fixed", "A": 142800, "B": 75800}
+    'отливки черных металлов': { 'type': 'material',
+                               'A': { 'rasxod': np.float64(2.1),
+                                      'otxod': np.float64(0.42)},
+                               'B': { 'rasxod': np.float64(3.25),
+                                      'otxod': np.float64(0.8125)}},
+  'отливки цветных металлов': { 'type': 'material',
+                                'A': { 'rasxod': np.float64(0.13),
+                                       'otxod': np.float64(0.0221)},
+                                'B': { 'rasxod': np.float64(0.18),
+                                       'otxod': np.float64(0.0324)}},
+    "покупные комплектующие изделия": {"type": "fixed", 'A': 168800, 'B': 60300}
 }
+
+# ^^^^^^^^^^     "покупные комплектующие изделия": {"type": "fixed", "A": 142800, "B": 75800}      ^^^^^^^^^^^^^^^^^^^^
 
 prices_example = {
     "стальной прокат_материал": 12800,
@@ -26,11 +45,12 @@ prices_example = {
     "отливки цветных металлов_отходы": 16900,
 }
 
-fuel_energy_example = {"A": 1, "B": 0.9}
+fuel_energy_example = {"A": 1.8, "B": 1.6}
 labor_example = {
-    "labor_hours": {"A": 920, "B": 157.32},
-    "hourly_rate": {"A": 41.50, "B": 35.60}
+    "labor_hours": {"A": 820, "B": 156},
+    "hourly_rate": {"A": 35.6, "B": 35.60}
 }
+
 rates_example = {
     "доп_зарплата": 40,
     "отчисления": 22,
@@ -40,11 +60,11 @@ rates_example = {
     "ВПР": 5,
     "рентабельность": 20
 }
-volume_base_example = {"A": 195, "B": 60}
+volume_base_example = {"A": 122, "B": 31}
 
 # --- Входные коэффициенты ---
-Ka_input = 1.06 # Коэффициент для корректировки объема
-Kj_input = 0.92 # Пример
+Ka_input = 1.03 # Коэффициент для корректировки объема
+Kj_input = 1.09 # Пример
 Ktr_input = 1.15 # Пример из расчета
 
 # --- Сохранение CSV ---
@@ -63,18 +83,18 @@ with open("input_data_table.json", "w", encoding="utf-8") as f:
 
 
 # --- Выполнение основной логики ---
-print("Исходные данные:")
-print(f"Ka = {Ka_input}, Kj = {Kj_input}, Ktr = {Ktr_input}")
-print(f"Базовый объем (из Дополнения 1, Вар. 3): {volume_base_example}")
-Q_A_calc = int(volume_base_example["A"] * Ka_input)
-Q_B_calc = int(volume_base_example["B"] * Ka_input)
-print(f"Рассчитанные объемы (Q_base * Ka, округленные до меньшего целого): A = {Q_A_calc}, B = {Q_B_calc}")
-print(f"Основные материалы: {materials_main_example}")
-print(f"Покупные ПФ+Комплектующие: {materials_purchased_example}")
-print(f"Цены: {prices_example}")
-print(f"Топливо и энергия: {fuel_energy_example}")
-print(f"Трудоемкость и ставка: {labor_example}")
-print(f"Процентные ставки: {rates_example}")
+# print("Исходные данные:")
+# print(f"Ka = {Ka_input}, Kj = {Kj_input}, Ktr = {Ktr_input}")
+# print(f"Базовый объем (из Дополнения 1, Вар. 3): {volume_base_example}")
+# Q_A_calc = int(volume_base_example["A"] * Ka_input)
+# Q_B_calc = int(volume_base_example["B"] * Ka_input)
+# print(f"Рассчитанные объемы (Q_base * Ka, округленные до меньшего целого): A = {Q_A_calc}, B = {Q_B_calc}")
+# print(f"Основные материалы: {materials_main_example}")
+# print(f"Покупные ПФ+Комплектующие: {materials_purchased_example}")
+# print(f"Цены: {prices_example}")
+# print(f"Топливо и энергия: {fuel_energy_example}")
+# print(f"Трудоемкость и ставка: {labor_example}")
+# print(f"Процентные ставки: {rates_example}")
 print("\n" + "="*50 + "\n")
 
 # Генерация вывода для изделий А и Б

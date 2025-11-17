@@ -567,12 +567,12 @@ def prepare_data_with_coefficients(data_materials, data_labor, data_volume_base,
     prepared_volume = {k: v * Ka for k, v in data_volume_base.items()} # Только Ka к объему
 
     # Применяем Kj к нормам расхода и отходов
-    for comp_name, comp_info in prepared_materials.items():
-        if isinstance(comp_info, dict) and 'rasxod' in comp_info:
-            for item in ['A', 'B']:
-                if item in comp_info:
-                    comp_info[item]['rasxod'] *= Kj
-                    comp_info[item]['otxod'] *= Kj
+    # for comp_name, comp_info in prepared_materials.items():
+    #     if isinstance(comp_info, dict) and 'rasxod' in comp_info:
+    #         for item in ['A', 'B']:
+    #             if item in comp_info:
+    #                 comp_info[item]['rasxod'] *= Kj
+    #                 comp_info[item]['otxod'] *= Kj
 
     # Применяем Kj к трудоемкости
     for item in ['A', 'B']:
