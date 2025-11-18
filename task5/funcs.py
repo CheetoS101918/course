@@ -98,7 +98,7 @@ class EnterpriseEconomicsCalculator:
         print("=== РАСЧЕТ ТАБЛИЦЫ 10 ===")
         print(f"Коэффициент оборачиваемости (Коб) = Qр / ОСн = {Q_r} / {OS_n} = {K_ob} об")
         print(f"Коэффициент закрепления (Кз) = 1 / Коб = 1 / {K_ob} = {K_z} руб/руб")
-        print(f"Длительность оборота (Тоб) = 360 / Коб = 360 / {K_ob} = {T_ob} дн")
+        print(f"Длительность оборота (Тоб) = 360 / Коб = 360 / {K_ob} = {T_ob} = {math.ceil(T_ob)} дн")
 
         mz_formula = " + ".join(str(float(comp)) for comp in MZ)
         print(f"Материалоемкость (МЕ) = МЗ / Qт = {mz_formula} / {Q_t} = {M_e} руб/руб")
@@ -134,10 +134,10 @@ class EnterpriseEconomicsCalculator:
 
         # Вывод в консоль
         print("=== РАСЧЕТ ТАБЛИЦЫ 11 ===")
-        print(f"Выработка на 1 ППП = Qт / Рппп = {Q_t} / {PP_count} = {V_ppp} тыс.руб/чел")
-        print(f"Выработка на 1 рабочего = Qт / Рраб = {Q_t} / {workers_count} = {V_worker} тыс.руб/чел")
+        print(f"Выработка на 1 ППП = Qт / Рппп = {Q_t} / {PP_count} = {V_ppp} тыс.руб/чел (1.29) ")
+        print(f"Выработка на 1 рабочего = Qт / Рраб = {Q_t} / {workers_count} = {V_worker} тыс.руб/чел (1.30)")
         print(
-            f"Выработка на 1 основного рабочего = Qт / Росн = {Q_t} / {main_workers_count} = {V_main_worker} тыс.руб/чел")
+            f"Выработка на 1 основного рабочего = Qт / Росн = {Q_t} / {main_workers_count} = {V_main_worker} тыс.руб/чел (1.31)")
         print()
 
     def _calculate_summary_indicators(self):
@@ -171,11 +171,11 @@ class EnterpriseEconomicsCalculator:
 
         # Вывод в консоль
         print("=== РАСЧЕТ ТАБЛИЦЫ 12 ===")
-        print(f"Затраты на 1 руб ТП = Стп / Qт = {C_tp} / {Q_t} = {Z_1rub} руб")
+        print(f"Затраты на 1 руб ТП = Стп / Qт = {C_tp} / {Q_t} = {Z_1rub} руб (1.32)")
         print(
-            f"Уровень общей рентабельности = (Пр / (Фср.г. + ОС)) * 100% = ({P} / ({F_sr} + {OS_n})) * 100% = {R_total}%")
-        print(f"Рентабельность продаж = (Пр / Qр) * 100% = ({P} / {Q_r}) * 100% = {R_sales}%")
-        print(f"Рентабельность себестоимости = (Пр / Стп) * 100% = ({P} / {C_tp}) * 100% = {R_cost}%")
+            f"Уровень общей рентабельности = (Пр / (Фср.г. + ОС)) * 100% = ({P} / ({F_sr} + {OS_n})) * 100% = {R_total}% (1.33)")
+        print(f"Рентабельность продаж = (Пр / Qр) * 100% = ({P} / {Q_r}) * 100% = {R_sales}% (1.34)")
+        print(f"Рентабельность себестоимости = (Пр / Стп) * 100% = ({P} / {C_tp}) * 100% = {R_cost}% (1.35)")
         print()
 
     def save_to_csv(self):

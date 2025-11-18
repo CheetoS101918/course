@@ -44,7 +44,7 @@ prices_example = {
 
 fuel_energy_example = {"A": 1, "B": 0.9}
 labor_example = {
-    "labor_hours": {"A": 920, "B": 157.32},
+    "labor_hours": {"A": 1000, "B": 171},
     "hourly_rate": {"A": 41.50, "B": 35.60}
 }
 rates_example = {

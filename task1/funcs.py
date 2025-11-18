@@ -567,12 +567,12 @@ def prepare_data_with_coefficients(data_materials, data_labor, data_volume_base,
     prepared_volume = {k: v * Ka for k, v in data_volume_base.items()} # Только Ka к объему
 
     # Применяем Kj к нормам расхода и отходов
-    for comp_name, comp_info in prepared_materials.items():
-        if isinstance(comp_info, dict) and 'rasxod' in comp_info:
-            for item in ['A', 'B']:
-                if item in comp_info:
-                    comp_info[item]['rasxod'] *= Kj
-                    comp_info[item]['otxod'] *= Kj
+    # for comp_name, comp_info in prepared_materials.items():
+    #     if isinstance(comp_info, dict) and 'rasxod' in comp_info:
+    #         for item in ['A', 'B']:
+    #             if item in comp_info:
+    #                 comp_info[item]['rasxod'] *= Kj
+    #                 comp_info[item]['otxod'] *= Kj
 
     # Применяем Kj к трудоемкости
     for item in ['A', 'B']:
@@ -739,7 +739,7 @@ def generate_input_table_csv(materials_main, materials_purchased, prices, fuel_e
     writer.writerow(["8", "Топливо и энергия на технологические потребности", "5", "%", fuel_energy.get("A"), fuel_energy.get("B")])
 
     # 9. Суммарная трудоемкость
-    writer.writerow(["9", "Суммарная трудоемкость изделия", "6", "н-час", labor.get("labor_hours", {}).get("A"), labor.get("labor_hours", {}).get("B")])
+    writer.writerow(["9", "Суммарная трудоемкость изделия", "6", "н-час", int(labor.get("labor_hours", {}).get("A") * Kj), int(labor.get("labor_hours", {}).get("B") * Kj)])
 
     # 10. Часовая тарифная ставка
     writer.writerow(["10", "Часовая тарифная ставка", "6", "руб", labor.get("hourly_rate", {}).get("A"), labor.get("hourly_rate", {}).get("B")])
