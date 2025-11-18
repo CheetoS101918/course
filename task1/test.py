@@ -97,7 +97,7 @@ with open("input_data_table.json", "w", encoding="utf-8") as f:
 print("\n" + "="*50 + "\n")
 
 # Генерация вывода для изделий А и Б
-output_result = generate_full_output(
+output_result, structure_data_A, structure_data_B, details_A, details_B = generate_full_output(  # Изменено: принимаем пять значений
     volume_base_example, Ka_input, Kj_input, Ktr_input,
     materials_main_example, materials_purchased_example,
     prices_example, fuel_energy_example, labor_example, rates_example
@@ -105,6 +105,13 @@ output_result = generate_full_output(
 
 print("Расчет по статьям:")
 print(output_result)
+
+# Теперь используем generate_output_by_punkt для нового формата вывода
+new_format_output = generate_output_by_punkt(structure_data_A, structure_data_B, details_A, details_B, rates_example)
+
+print("\n" + "="*80 + "\n")
+print("РАСЧЕТ В НОВОМ ФОРМАТЕ (по пунктам):")
+print(new_format_output)
 
 # --- Новый код для получения данных структуры ---
 prepared_materials_main, prepared_labor, prepared_volume = prepare_data_with_coefficients(
@@ -119,14 +126,28 @@ structure_data_A = {}
 structure_data_B = {}
 for item in ['A', 'B']:
     Q_item = prepared_volume[item]
-    _, item_structure = generate_output_for_item(
-        item, Q_item, 1, Ktr_input,
+    # _, item_structure = generate_output_for_item(
+    #     item, Q_item, 1, Ktr_input,
+    #     combined_materials, prices_example, fuel_energy_example, prepared_labor, rates_example
+    # )
+    # if item == 'A':
+    #     structure_data_A = item_structure
+    # else:
+    #     structure_data_B = item_structure
+
+    _, item_structure, item_details = generate_output_for_item(
+        item, Q_item, Ka_input, Ktr_input,
         combined_materials, prices_example, fuel_energy_example, prepared_labor, rates_example
     )
+
     if item == 'A':
         structure_data_A = item_structure
+        details_A = item_details
     else:
         structure_data_B = item_structure
+        details_B = item_details
+
+output_result = generate_output_by_punkt(structure_data_A, structure_data_B, details_A, details_B, rates_example)
 
 # --- Конец нового кода ---
 
