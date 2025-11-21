@@ -1,8 +1,35 @@
 import pandas as pd
 from docx import Document
-from docx.shared import Inches
+from docx.shared import Inches, Pt
+from docx.enum.style import WD_STYLE_TYPE
 import sys
 
+
+def create_custom_style(doc):
+    """Создает изолированный стиль для таблицы без отступов"""
+    styles = doc.styles
+    # Создаем новый стиль абзаца
+    style_name = 'CsvTableText'
+
+    try:
+        custom_style = styles.add_style(style_name, WD_STYLE_TYPE.PARAGRAPH)
+        custom_style.base_style = styles['Normal']
+    except:
+        custom_style = styles[style_name]  # Если вдруг уже есть
+
+    # Настраиваем стиль жестко
+    p_fmt = custom_style.paragraph_format
+    p_fmt.first_line_indent = Pt(0)
+    p_fmt.left_indent = Pt(0)
+    p_fmt.space_before = Pt(0)
+    p_fmt.space_after = Pt(0)
+
+    # Можно добавить шрифт, чтобы он тоже не слетал
+    font = custom_style.font
+    font.name = 'Times New Roman'  # Или какой вам нужен
+    font.size = Pt(14)
+
+    return style_name
 
 def create_docx_from_csv(csv_file, output_file=None):
     """
@@ -26,6 +53,8 @@ def create_docx_from_csv(csv_file, output_file=None):
     # Шаг 3: Создаём DOCX
     doc = Document()
 
+    table_style_name = create_custom_style(doc)
+
     # Шаг 4: Добавляем таблицу
     table = doc.add_table(rows=len(df) + 1, cols=len(df.columns))
     table.style = 'Table Grid'  # Рамки
@@ -34,13 +63,18 @@ def create_docx_from_csv(csv_file, output_file=None):
     for j, column in enumerate(df.columns):
         cell = table.cell(0, j)
         cell.text = str(column)
+        # !!! 2. Применяем стиль
+        cell.paragraphs[0].style = doc.styles[table_style_name]
+        cell.paragraphs[0].runs[0].bold = True
 
     # Шаг 6: Заполняем данные (NaN -> пустая ячейка)
     for i, row in df.iterrows():
         for j, value in enumerate(row):
             cell = table.cell(i + 1, j)
-            if pd.notna(value):
-                cell.text = str(value)
+            clean_value = str(value).strip() if pd.notna(value) else ""
+            cell.text = clean_value
+            # !!! 2. Применяем стиль к каждой ячейке
+            cell.paragraphs[0].style = doc.styles[table_style_name]
 
     # Шаг 7: Настраиваем ширину столбцов
     table.columns[0].width = Inches(2.5)  # Шире для названий

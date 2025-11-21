@@ -3,32 +3,34 @@ import numpy as np
 
 
 materials_main_example = { 'стальной прокат': { 'type': 'material',
-                       'A': { 'rasxod': np.float64(0.38),
-                              'otxod': np.float64(0.0684)},
-                       'B': { 'rasxod': np.float64(0.061),
-                              'otxod': np.float64(0.00305)}},
+                       'A': { 'rasxod': np.float64(0.5),
+                              'otxod': np.float64(0.1)},
+                       'B': { 'rasxod': np.float64(0.03),
+                              'otxod': np.float64(0.0045)}},
   'трубы стальные': { 'type': 'material',
                       'A': { 'rasxod': np.float64(0.04),
                              'otxod': np.float64(0.004)},
-                      'B': { 'rasxod': np.float64(0.015),
-                             'otxod': np.float64(0.0012)}},
+                      'B': { 'rasxod': np.float64(0.003),
+                             'otxod': np.float64(0.00024)}},
   'прокат цветных металлов': { 'type': 'fixed',
-                               'A': np.int64(3100),
-                               'B': np.int64(2700)},
-  'другие материалы': {'type': 'fixed', 'A': np.int64(700), 'B': np.int64(560)}}
+                               'A': np.int64(2600),
+                               'B': np.int64(1000)},
+  'другие материалы': { 'type': 'fixed',
+                        'A': np.int64(2800),
+                        'B': np.int64(800)}}
 
 materials_purchased_example = {
     'отливки черных металлов': { 'type': 'material',
-                               'A': { 'rasxod': np.float64(2.1),
-                                      'otxod': np.float64(0.42)},
-                               'B': { 'rasxod': np.float64(3.25),
-                                      'otxod': np.float64(0.8125)}},
+                               'A': { 'rasxod': np.float64(3.0),
+                                      'otxod': np.float64(0.6000000000000001)},
+                               'B': { 'rasxod': np.float64(1.0),
+                                      'otxod': np.float64(0.15)}},
   'отливки цветных металлов': { 'type': 'material',
-                                'A': { 'rasxod': np.float64(0.13),
-                                       'otxod': np.float64(0.0221)},
-                                'B': { 'rasxod': np.float64(0.18),
-                                       'otxod': np.float64(0.0324)}},
-    "покупные комплектующие изделия": {"type": "fixed", 'A': 168800, 'B': 60300}
+                                'A': { 'rasxod': np.float64(0.2),
+                                       'otxod': np.float64(0.04000000000000001)},
+                                'B': { 'rasxod': np.float64(0.1),
+                                       'otxod': np.float64(0.015)}},
+    "покупные комплектующие изделия": {"type": "fixed", 'A': np.int64(139000), 'B': np.int64(39800)}
 }
 
 # ^^^^^^^^^^     "покупные комплектующие изделия": {"type": "fixed", "A": 142800, "B": 75800}   тут мое   ^^^^^^^^^^^^^^^^^^^^
@@ -44,26 +46,24 @@ prices_example = {
     "отливки цветных металлов_отходы": 16900,
 }
 
-fuel_energy_example = {"A": 1.8, "B": 1.6}
-labor_example = {
-    "labor_hours": {"A": 820, "B": 156},
-    "hourly_rate": {"A": 35.6, "B": 35.60}
-}
+fuel_energy_example = {"A": 1.4, "B": 1.1}
+labor_example = { 'labor_hours': {'A': np.int64(680), 'B': np.int64(193)},
+  'hourly_rate': {'A': 30.25, 'B': 35.6}}
 
 rates_example = {
-    "доп_зарплата": 41,
+    "доп_зарплата": 40,
     "отчисления": 22,
-    "РСЭО": 110,
-    "ОПР": 110,
-    "ОХР": 140,
+    "РСЭО": 87,
+    "ОПР": 85,
+    "ОХР": 98,
     "ВПР": 5,
-    "рентабельность": 25
+    "рентабельность": 20
 }
-volume_base_example = {"A": 122, "B": 31}
+volume_base_example = {"A": 100, "B": 50}
 
 # --- Входные коэффициенты ---
-Ka_input = 1.03 # Коэффициент для корректировки объема
-Kj_input = 1.09 # Пример
+Ka_input = 0.92 # Коэффициент для корректировки объема
+Kj_input = 0.98 # Пример
 Ktr_input = 1.15 # Пример из расчета
 
 # --- Сохранение CSV ---
