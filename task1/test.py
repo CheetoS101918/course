@@ -79,22 +79,22 @@ with open("input_data_table.json", "w", encoding="utf-8") as f:
 
 
 # --- Выполнение основной логики ---
-print("Исходные данные:")
-print(f"Ka = {Ka_input}, Kj = {Kj_input}, Ktr = {Ktr_input}")
-print(f"Базовый объем (из Дополнения 1, Вар. 3): {volume_base_example}")
-Q_A_calc = int(volume_base_example["A"] * Ka_input)
-Q_B_calc = int(volume_base_example["B"] * Ka_input)
-print(f"Рассчитанные объемы (Q_base * Ka, округленные до меньшего целого): A = {Q_A_calc}, B = {Q_B_calc}")
-print(f"Основные материалы: {materials_main_example}")
-print(f"Покупные ПФ+Комплектующие: {materials_purchased_example}")
-print(f"Цены: {prices_example}")
-print(f"Топливо и энергия: {fuel_energy_example}")
-print(f"Трудоемкость и ставка: {labor_example}")
-print(f"Процентные ставки: {rates_example}")
+# print("Исходные данные:")
+# print(f"Ka = {Ka_input}, Kj = {Kj_input}, Ktr = {Ktr_input}")
+# print(f"Базовый объем (из Дополнения 1, Вар. 3): {volume_base_example}")
+# Q_A_calc = int(volume_base_example["A"] * Ka_input)
+# Q_B_calc = int(volume_base_example["B"] * Ka_input)
+# print(f"Рассчитанные объемы (Q_base * Ka, округленные до меньшего целого): A = {Q_A_calc}, B = {Q_B_calc}")
+# print(f"Основные материалы: {materials_main_example}")
+# print(f"Покупные ПФ+Комплектующие: {materials_purchased_example}")
+# print(f"Цены: {prices_example}")
+# print(f"Топливо и энергия: {fuel_energy_example}")
+# print(f"Трудоемкость и ставка: {labor_example}")
+# print(f"Процентные ставки: {rates_example}")
 print("\n" + "="*50 + "\n")
 
 # Генерация вывода для изделий А и Б
-output_result = generate_full_output(
+output_result, structure_data_A, structure_data_B, details_A, details_B = generate_full_output(  # Изменено: принимаем пять значений
     volume_base_example, Ka_input, Kj_input, Ktr_input,
     materials_main_example, materials_purchased_example,
     prices_example, fuel_energy_example, labor_example, rates_example
@@ -102,6 +102,13 @@ output_result = generate_full_output(
 
 print("Расчет по статьям:")
 print(output_result)
+
+# Теперь используем generate_output_by_punkt для нового формата вывода
+new_format_output = generate_output_by_punkt(structure_data_A, structure_data_B, details_A, details_B, rates_example)
+
+print("\n" + "="*80 + "\n")
+print("РАСЧЕТ В НОВОМ ФОРМАТЕ (по пунктам):")
+print(new_format_output)
 
 # --- Новый код для получения данных структуры ---
 prepared_materials_main, prepared_labor, prepared_volume = prepare_data_with_coefficients(
@@ -116,14 +123,28 @@ structure_data_A = {}
 structure_data_B = {}
 for item in ['A', 'B']:
     Q_item = prepared_volume[item]
-    _, item_structure = generate_output_for_item(
-        item, Q_item, 1, Ktr_input,
+    # _, item_structure = generate_output_for_item(
+    #     item, Q_item, 1, Ktr_input,
+    #     combined_materials, prices_example, fuel_energy_example, prepared_labor, rates_example
+    # )
+    # if item == 'A':
+    #     structure_data_A = item_structure
+    # else:
+    #     structure_data_B = item_structure
+
+    _, item_structure, item_details = generate_output_for_item(
+        item, Q_item, Ka_input, Ktr_input,
         combined_materials, prices_example, fuel_energy_example, prepared_labor, rates_example
     )
+
     if item == 'A':
         structure_data_A = item_structure
+        details_A = item_details
     else:
         structure_data_B = item_structure
+        details_B = item_details
+
+output_result = generate_output_by_punkt(structure_data_A, structure_data_B, details_A, details_B, rates_example)
 
 # --- Конец нового кода ---
 
@@ -149,6 +170,9 @@ volumes_output += "где:\n"
 volumes_output += "QA и QБ – годовой объем производства изделий А и Б, шт.;\n"
 volumes_output += "ЦА и ЦБ – оптовая цена предприятия изделий А и Б.\n"
 volumes_output += f"QT = ({price_A:.2f} * {Q_A} + {price_B:.2f} * {Q_B}) / 1000 = {Q_t:.2f} тыс.руб.\n\n"
+
+volumes_output += f"Годовой объем товарной продукции  A: {(price_A * Q_A) / 1000:.2f} тыс. руб. \n"
+volumes_output += f"Годовой объем товарной продукции  Б: {(price_B * Q_B) / 1000:.2f} тыс. руб. \n \n"
 
 volumes_output += "Объем реализованной продукции (Qр):\n"
 volumes_output += f"Qр = Qн + Qт – Qк (1.7)\n"

@@ -468,7 +468,15 @@ def generate_output_for_item(item_name, Q_base, Ka, Ktr, data_materials, data_pr
         "Q": Q_corrected
     }
 
-    return output, structure_data
+    details = {
+        'breakdown_main': breakdown_main,
+        'breakdown_purchased': breakdown_purchased,
+        'fuel_energy_percentage': fuel_energy_percentage,
+        'labor_hours': labor_hours,
+        'hourly_rate': hourly_rate
+    }
+
+    return output, structure_data, details
 
 def generate_structure_table_csv(structure_data_A, structure_data_B):
     """Генерирует итоговую таблицу структуры себестоимости в формате CSV."""
@@ -598,24 +606,29 @@ def generate_full_output(Q_base_data, Ka, Kj, Ktr, materials_main, materials_pur
     output = "1.1 Расчет себестоимости и цены изделий\n\n"
     structure_data_A = None
     structure_data_B = None
+    details_A = None
+    details_B = None
 
     for item in ['A', 'B']:
         Q_item = prepared_volume[item] # Используем подготовленный объем
-        item_output, item_structure = generate_output_for_item(
+        item_output, item_structure, item_details = generate_output_for_item(  # Изменено: принимаем три значения
             item, Q_item, 1, Ktr, # Ka=1, потому что объем Q_item уже скорректирован
             combined_materials, prices, fuel_energy, prepared_labor, rates
         )
         output += item_output
         if item == 'A':
             structure_data_A = item_structure
+            details_A = item_details
         else:
             structure_data_B = item_structure
+            details_B = item_details
 
     # Генерация таблицы структуры
     # if structure_data_A and structure_data_B:
     #     output += generate_structure_table_csv(structure_data_A, structure_data_B)
 
-    return output
+    return output, structure_data_A, structure_data_B, details_A, details_B  # Изменено: возвращаем пять значений
+
 
 
 def calculate_profit(full_cost, profitability_percentage):
@@ -739,7 +752,7 @@ def generate_input_table_csv(materials_main, materials_purchased, prices, fuel_e
     writer.writerow(["8", "Топливо и энергия на технологические потребности", "5", "%", fuel_energy.get("A"), fuel_energy.get("B")])
 
     # 9. Суммарная трудоемкость
-    writer.writerow(["9", "Суммарная трудоемкость изделия", "6", "н-час", int(labor.get("labor_hours", {}).get("A") * Kj), int(labor.get("labor_hours", {}).get("B") * Kj)])
+    writer.writerow(["9", "Суммарная трудоемкость изделия", "6", "н-час", round(labor.get("labor_hours", {}).get("A") * Kj, 3), round(labor.get("labor_hours", {}).get("B") * Kj, 3)])
 
     # 10. Часовая тарифная ставка
     writer.writerow(["10", "Часовая тарифная ставка", "6", "руб", labor.get("hourly_rate", {}).get("A"), labor.get("hourly_rate", {}).get("B")])
@@ -926,3 +939,227 @@ def csv_to_json_structure(csv_path: str) -> List[Dict[str, Any]]:
 # structure_data_A = ...
 # structure_data_B = ...
 # save_structure_table_to_json(structure_data_A, structure_data_B)
+
+def generate_output_by_punkt(structure_data_A, structure_data_B, data_A_details, data_B_details, rates):
+    """
+    Генерирует форматированный текстовый вывод, сгруппированный по пунктам
+    с расчетами для обоих изделий А и Б в каждом пункте
+    """
+    output = ""
+
+    # --- 1. Основные материалы ---
+    output += "1. Основные материалы за вычетом оборотных отходов\n"
+    output += "Сом = ( Нмi * Цмi * Ктр - Н0i*Ц0i) (1.1)\n"
+    output += "где Цмi - цена i -го вида материала, руб / т;\n"
+    output += "Ктр - коэффициент, который учитывает транспортно-заготовительные расходы (принимается в интервале значений 1,1 - 1,15);\n"
+    output += "Ноi - норма отходов, т;\n"
+    output += "Цоi - цена отходов, руб /т;\n"
+    output += "m - число наименований материалов.\n"
+
+    output += "Изделие А\n"
+    output += f"На единицу:\n"
+    output += f"Сом i = {data_A_details['breakdown_main']} = {format_cost(structure_data_A['Единица_Сом'])}\n"
+    output += f"На годовой выпуск:\n"
+    output += f"Сом = Сом i * Q = {format_cost(structure_data_A['Единица_Сом'])} * {structure_data_A['Q']} = {format_cost_annual(structure_data_A['Годовой_Сом'])}\n"
+
+    output += "Изделие Б\n"
+    output += f"На единицу:\n"
+    output += f"Сом i = {data_B_details['breakdown_main']} = {format_cost(structure_data_B['Единица_Сом'])}\n"
+    output += f"На годовой выпуск:\n"
+    output += f"Сом = Сом i * Q = {format_cost(structure_data_B['Единица_Сом'])} * {structure_data_B['Q']} = {format_cost_annual(structure_data_B['Годовой_Сом'])}\n\n"
+
+    # --- 2. Покупные полуфабрикаты и комплектующие ---
+    output += "2. Расходы на покупные полуфабрикаты (СПФ) и комплектующие изделия ( Ском ).\n"
+    output += "Расходы на покупные полуфабрикаты рассчитываются по вышеприведенной формуле . Стоимость комплектующих изделий определяется суммированием расходов на приобретение составных частей для производства продукции согласно данным дополнения 3.\n"
+    output += "С пф = Σ ( Нмi * Цмi * Ктр - Н0iЦ0i) (1.3)\n"
+
+    output += "Изделие А\n"
+    output += f"На единицу:\n"
+    output += f"СПФ+Ском = {data_A_details['breakdown_purchased']} = {format_cost(structure_data_A['Единица_Спф_Ском'])}\n"
+    output += f"На годовой выпуск:\n"
+    output += f"( СПФ+Ском ) * Q = {format_cost(structure_data_A['Единица_Спф_Ском'])} * {structure_data_A['Q']} = {format_cost_annual(structure_data_A['Годовой_Спф_Ском'])}\n"
+
+    output += "Изделие Б\n"
+    output += f"На единицу:\n"
+    output += f"СПФ+Ском = {data_B_details['breakdown_purchased']} = {format_cost(structure_data_B['Единица_Спф_Ском'])}\n"
+    output += f"На годовой выпуск:\n"
+    output += f"( СПФ+Ском ) * Q = {format_cost(structure_data_B['Единица_Спф_Ском'])} * {structure_data_B['Q']} = {format_cost_annual(structure_data_B['Годовой_Спф_Ском'])}\n\n"
+
+    # --- 3. Топливо и энергия ---
+    output += "3. Топливо и энергия на технологические потребности\n"
+
+    output += "Изделие А\n"
+    output += f"На единицу:\n"
+    output += f"Стэ = (Сом + Спф+Ском) * ({data_A_details['fuel_energy_percentage']}/(100-{data_A_details['fuel_energy_percentage']})) = ({format_cost(structure_data_A['Единица_Сом'])} + {format_cost(structure_data_A['Единица_Спф_Ском'])}) * {data_A_details['fuel_energy_percentage']}/(100-{data_A_details['fuel_energy_percentage']}) = {format_cost(structure_data_A['Единица_Стэ'])}\n"
+    output += f"На годовой выпуск:\n"
+    output += f"Стэ = {format_cost(structure_data_A['Единица_Стэ'])} * {structure_data_A['Q']} = {format_cost_annual(structure_data_A['Годовой_Стэ'])}\n"
+
+    output += "Изделие Б\n"
+    output += f"На единицу:\n"
+    output += f"Стэ = (Сом + Спф+Ском) * ({data_B_details['fuel_energy_percentage']}/(100-{data_B_details['fuel_energy_percentage']})) = ({format_cost(structure_data_B['Единица_Сом'])} + {format_cost(structure_data_B['Единица_Спф_Ском'])}) * {data_B_details['fuel_energy_percentage']}/(100-{data_B_details['fuel_energy_percentage']}) = {format_cost(structure_data_B['Единица_Стэ'])}\n"
+    output += f"На годовой выпуск:\n"
+    output += f"Стэ = {format_cost(structure_data_B['Единица_Стэ'])} * {structure_data_B['Q']} = {format_cost_annual(structure_data_B['Годовой_Стэ'])}\n\n"
+
+    # --- 4. Основная заработная плата ---
+    output += "4. Основная заработная плата производственных рабочих (Сосн.)\n"
+    output += "Сосн = t * Т (1.5)\n"
+    output += "где t - часовая тарифная ставка среднего разряда работ по изделию, руб;\n"
+    output += "Т - суммарная трудоемкость единицы продукции, нормо-часов.\n"
+
+    output += "Изделие А\n"
+    output += f"На единицу:\n"
+    output += f"Сосн = {data_A_details['labor_hours']} * {data_A_details['hourly_rate']} = {format_cost(structure_data_A['Единица_Сосн'])}\n"
+    output += f"На годовой выпуск:\n"
+    output += f"Сосн = {format_cost(structure_data_A['Единица_Сосн'])} * {structure_data_A['Q']} = {format_cost_annual(structure_data_A['Годовой_Сосн'])}\n"
+
+    output += "Изделие Б\n"
+    output += f"На единицу:\n"
+    output += f"Сосн = {data_B_details['labor_hours']} * {data_B_details['hourly_rate']} = {format_cost(structure_data_B['Единица_Сосн'])}\n"
+    output += f"На годовой выпуск:\n"
+    output += f"Сосн = {format_cost(structure_data_B['Единица_Сосн'])} * {structure_data_B['Q']} = {format_cost_annual(structure_data_B['Годовой_Сосн'])}\n\n"
+
+    # --- 5. Дополнительная заработная плата ---
+    output += "5. Дополнительная заработная плата производственных рабочих\n"
+
+    output += "Изделие А\n"
+    output += f"На единицу:\n"
+    output += f"Сдоп = Сосн * ({rates['доп_зарплата']}/100) = {format_cost(structure_data_A['Единица_Сосн'])} * {rates['доп_зарплата'] / 100} = {format_cost(structure_data_A['Единица_Сдоп'])}\n"
+    output += f"На годовой выпуск:\n"
+    output += f"Сдоп = {format_cost(structure_data_A['Единица_Сдоп'])} * {structure_data_A['Q']} = {format_cost_annual(structure_data_A['Годовой_Сдоп'])}\n"
+
+    output += "Изделие Б\n"
+    output += f"На единицу:\n"
+    output += f"Сдоп = Сосн * ({rates['доп_зарплата']}/100) = {format_cost(structure_data_B['Единица_Сосн'])} * {rates['доп_зарплата'] / 100} = {format_cost(structure_data_B['Единица_Сдоп'])}\n"
+    output += f"На годовой выпуск:\n"
+    output += f"Сдоп = {format_cost(structure_data_B['Единица_Сдоп'])} * {structure_data_B['Q']} = {format_cost_annual(structure_data_B['Годовой_Сдоп'])}\n\n"
+
+    # --- 6. Отчисления в фонды социальных мероприятий ---
+    output += "6. Отчисление в фонды социальных мероприятий\n"
+
+    output += "Изделие А\n"
+    output += f"На единицу:\n"
+    output += f"Ссоц = (Сосн + Сдоп) * ({rates['отчисления']}/100) = ({format_cost(structure_data_A['Единица_Сосн'], '')} + {format_cost(structure_data_A['Единица_Сдоп'], '')}) * {rates['отчисления'] / 100} = {format_cost(structure_data_A['Единица_Ссоц'])}\n"
+    output += f"На годовой выпуск:\n"
+    output += f"Ссоц = {format_cost(structure_data_A['Единица_Ссоц'])} * {structure_data_A['Q']} = {format_cost_annual(structure_data_A['Годовой_Ссоц'])}\n"
+
+    output += "Изделие Б\n"
+    output += f"На единицу:\n"
+    output += f"Ссоц = (Сосн + Сдоп) * ({rates['отчисления']}/100) = ({format_cost(structure_data_B['Единица_Сосн'], '')} + {format_cost(structure_data_B['Единица_Сдоп'], '')}) * {rates['отчисления'] / 100} = {format_cost(structure_data_B['Единица_Ссоц'])}\n"
+    output += f"На годовой выпуск:\n"
+    output += f"Ссоц = {format_cost(structure_data_B['Единица_Ссоц'])} * {structure_data_B['Q']} = {format_cost_annual(structure_data_B['Годовой_Ссоц'])}\n\n"
+
+    # --- 7. РСЭО ---
+    output += "7. Расходы на содержание и эксплуатацию оборудования\n"
+
+    output += "Изделие А\n"
+    output += f"На единицу:\n"
+    output += f"Рсэо = Сосн * ({rates['РСЭО']}/100) = {format_cost(structure_data_A['Единица_Сосн'])} * {rates['РСЭО'] / 100} = {format_cost(structure_data_A['Единица_Рсэо'])}\n"
+    output += f"На годовой выпуск:\n"
+    output += f"Рсэо = {format_cost(structure_data_A['Единица_Рсэо'])} * {structure_data_A['Q']} = {format_cost_annual(structure_data_A['Годовой_Рсэо'])}\n"
+
+    output += "Изделие Б\n"
+    output += f"На единицу:\n"
+    output += f"Рсэо = Сосн * ({rates['РСЭО']}/100) = {format_cost(structure_data_B['Единица_Сосн'])} * {rates['РСЭО'] / 100} = {format_cost(structure_data_B['Единица_Рсэо'])}\n"
+    output += f"На годовой выпуск:\n"
+    output += f"Рсэо = {format_cost(structure_data_B['Единица_Рсэо'])} * {structure_data_B['Q']} = {format_cost_annual(structure_data_B['Годовой_Рсэо'])}\n\n"
+
+    # --- 8. ОПР ---
+    output += "8. Общепроизводственные расходы\n"
+
+    output += "Изделие А\n"
+    output += f"На единицу:\n"
+    output += f"Роп = Сосн * ({rates['ОПР']}/100) = {format_cost(structure_data_A['Единица_Сосн'])} * {rates['ОПР'] / 100} = {format_cost(structure_data_A['Единица_Роп'])}\n"
+    output += f"На годовой выпуск:\n"
+    output += f"Роп = {format_cost(structure_data_A['Единица_Роп'])} * {structure_data_A['Q']} = {format_cost_annual(structure_data_A['Годовой_Роп'])}\n"
+
+    output += "Изделие Б\n"
+    output += f"На единицу:\n"
+    output += f"Роп = Сосн * ({rates['ОПР']}/100) = {format_cost(structure_data_B['Единица_Сосн'])} * {rates['ОПР'] / 100} = {format_cost(structure_data_B['Единица_Роп'])}\n"
+    output += f"На годовой выпуск:\n"
+    output += f"Роп = {format_cost(structure_data_B['Единица_Роп'])} * {structure_data_B['Q']} = {format_cost_annual(structure_data_B['Годовой_Роп'])}\n\n"
+
+    # --- 9. ОХР ---
+    output += "9. Общехозяйственные расходы\n"
+
+    output += "Изделие А\n"
+    output += f"На единицу:\n"
+    output += f"Рох = Сосн * ({rates['ОХР']}/100) = {format_cost(structure_data_A['Единица_Сосн'])} * {rates['ОХР'] / 100} = {format_cost(structure_data_A['Единица_Рох'])}\n"
+    output += f"На годовой выпуск:\n"
+    output += f"Рох = {format_cost(structure_data_A['Единица_Рох'])} * {structure_data_A['Q']} = {format_cost_annual(structure_data_A['Годовой_Рох'])}\n"
+
+    output += "Изделие Б\n"
+    output += f"На единицу:\n"
+    output += f"Рох = Сосн * ({rates['ОХР']}/100) = {format_cost(structure_data_B['Единица_Сосн'])} * {rates['ОХР'] / 100} = {format_cost(structure_data_B['Единица_Рох'])}\n"
+    output += f"На годовой выпуск:\n"
+    output += f"Рох = {format_cost(structure_data_B['Единица_Рох'])} * {structure_data_B['Q']} = {format_cost_annual(structure_data_B['Годовой_Рох'])}\n\n"
+
+    # --- Производственная себестоимость ---
+    output += "ВСЕГО производственная себестоимость\n"
+
+    output += "Изделие А\n"
+    output += f"На единицу:\n"
+    output += f"Спр = Сом + (Спф+Ском) + Стэ + Сосн + Сдоп + Ссоц + Рсэо + Роп + Рох = {format_cost(structure_data_A['Единица_Сом'])} + {format_cost(structure_data_A['Единица_Спф_Ском'])} + {format_cost(structure_data_A['Единица_Стэ'])} + {format_cost(structure_data_A['Единица_Сосн'])} + {format_cost(structure_data_A['Единица_Сдоп'])} + {format_cost(structure_data_A['Единица_Ссоц'])} + {format_cost(structure_data_A['Единица_Рсэо'])} + {format_cost(structure_data_A['Единица_Роп'])} + {format_cost(structure_data_A['Единица_Рох'])} = {format_cost(structure_data_A['Единица_Спр'])}\n"
+    output += f"На годовой выпуск:\n"
+    output += f"Спр = {format_cost(structure_data_A['Единица_Спр'])} * {structure_data_A['Q']} = {format_cost_annual(structure_data_A['Годовой_Спр'])}\n"
+
+    output += "Изделие Б\n"
+    output += f"На единицу:\n"
+    output += f"Спр = Сом + (Спф+Ском) + Стэ + Сосн + Сдоп + Ссоц + Рсэо + Роп + Рох = {format_cost(structure_data_B['Единица_Сом'])} + {format_cost(structure_data_B['Единица_Спф_Ском'])} + {format_cost(structure_data_B['Единица_Стэ'])} + {format_cost(structure_data_B['Единица_Сосн'])} + {format_cost(structure_data_B['Единица_Сдоп'])} + {format_cost(structure_data_B['Единица_Ссоц'])} + {format_cost(structure_data_B['Единица_Рсэо'])} + {format_cost(structure_data_B['Единица_Роп'])} + {format_cost(structure_data_B['Единица_Рох'])} = {format_cost(structure_data_B['Единица_Спр'])}\n"
+    output += f"На годовой выпуск:\n"
+    output += f"Спр = {format_cost(structure_data_B['Единица_Спр'])} * {structure_data_B['Q']} = {format_cost_annual(structure_data_B['Годовой_Спр'])}\n\n"
+
+    # --- 10. Внепроизводственные расходы ---
+    output += "10. Внепроизводственные расходы\n"
+
+    output += "Изделие А\n"
+    output += f"На единицу:\n"
+    output += f"Свп = Спр * ({rates['ВПР']}/100) = {format_cost(structure_data_A['Единица_Спр'])} * {rates['ВПР'] / 100} = {format_cost(structure_data_A['Единица_Свп'])}\n"
+    output += f"На годовой выпуск:\n"
+    output += f"Свп = {format_cost(structure_data_A['Единица_Свп'])} * {structure_data_A['Q']} = {format_cost_annual(structure_data_A['Годовой_Свп'])}\n"
+
+    output += "Изделие Б\n"
+    output += f"На единицу:\n"
+    output += f"Свп = Спр * ({rates['ВПР']}/100) = {format_cost(structure_data_B['Единица_Спр'])} * {rates['ВПР'] / 100} = {format_cost(structure_data_B['Единица_Свп'])}\n"
+    output += f"На годовой выпуск:\n"
+    output += f"Свп = {format_cost(structure_data_B['Единица_Свп'])} * {structure_data_B['Q']} = {format_cost_annual(structure_data_B['Годовой_Свп'])}\n\n"
+
+    # --- Полная себестоимость ---
+    output += "ВСЕГО полная (коммерческая) себестоимость\n"
+
+    output += "Изделие А\n"
+    output += f"На единицу:\n"
+    output += f"Сп = Спр + Свп = {format_cost(structure_data_A['Единица_Спр'])} + {format_cost(structure_data_A['Единица_Свп'])} = {format_cost(structure_data_A['Единица_Сп'])}\n"
+    output += f"На годовой выпуск:\n"
+    output += f"Сп = {format_cost(structure_data_A['Единица_Сп'])} * {structure_data_A['Q']} = {format_cost_annual(structure_data_A['Годовой_Сп'])}\n"
+
+    output += "Изделие Б\n"
+    output += f"На единицу:\n"
+    output += f"Сп = Спр + Свп = {format_cost(structure_data_B['Единица_Спр'])} + {format_cost(structure_data_B['Единица_Свп'])} = {format_cost(structure_data_B['Единица_Сп'])}\n"
+    output += f"На годовой выпуск:\n"
+    output += f"Сп = {format_cost(structure_data_B['Единица_Сп'])} * {structure_data_B['Q']} = {format_cost_annual(structure_data_B['Годовой_Сп'])}\n\n"
+
+    # --- 11. Прибыль ---
+    output += "11. Прибыль\n"
+
+    output += "Изделие А\n"
+    output += f"На единицу:\n"
+    output += f"П = Сп * ({rates['рентабельность']}/100) = {format_cost(structure_data_A['Единица_Сп'])} * {rates['рентабельность'] / 100} = {format_cost(structure_data_A['Единица_Прибыль'])}\n"
+    output += f"На годовой выпуск:\n"
+    output += f"П = {format_cost(structure_data_A['Единица_Прибыль'])} * {structure_data_A['Q']} = {format_cost_annual(structure_data_A['Годовой_Прибыль'])}\n"
+
+    output += "Изделие Б\n"
+    output += f"На единицу:\n"
+    output += f"П = Сп * ({rates['рентабельность']}/100) = {format_cost(structure_data_B['Единица_Сп'])} * {rates['рентабельность'] / 100} = {format_cost(structure_data_B['Единица_Прибыль'])}\n"
+    output += f"На годовой выпуск:\n"
+    output += f"П = {format_cost(structure_data_B['Единица_Прибыль'])} * {structure_data_B['Q']} = {format_cost_annual(structure_data_B['Годовой_Прибыль'])}\n\n"
+
+    # --- 12. Оптовая цена ---
+    output += "12. Оптовая (отпускная) цена\n"
+
+    output += "Изделие А\n"
+    output += f"Цопт = Сп + П = {format_cost(structure_data_A['Единица_Сп'])} + {format_cost(structure_data_A['Единица_Прибыль'])} = {format_cost(structure_data_A['Оптовая_цена'])}\n"
+
+    output += "Изделие Б\n"
+    output += f"Цопт = Сп + П = {format_cost(structure_data_B['Единица_Сп'])} + {format_cost(structure_data_B['Единица_Прибыль'])} = {format_cost(structure_data_B['Оптовая_цена'])}\n\n"
+
+    return output
