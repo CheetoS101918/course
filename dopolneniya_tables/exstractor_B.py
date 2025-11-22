@@ -101,7 +101,7 @@ def extract_materials_data(variant: int, pretty_print: bool = True):
 
 
 # Пример использования с красивой печатью (по умолчанию):
-extract_materials_data(1)
+extract_materials_data(2)
 
 # Если хочешь просто вернуть словари (без печати):
 # materials_main, materials_purchased = extract_materials_data(2, pretty_print=False)

@@ -7,10 +7,10 @@ materials_main_example = { 'стальной прокат': { 'type': 'material'
                        'A': { 'rasxod': np.float64(0.45),
                               'otxod': np.float64(0.0675)},
                        'B': { 'rasxod': np.float64(0.05),
-                              'otxod': np.float64(0.005000000000000001)}},
+                              'otxod': np.float64(0.005)}},
   'трубы стальные': { 'type': 'material',
                       'A': { 'rasxod': np.float64(0.04),
-                             'otxod': np.float64(0.0028000000000000004)},
+                             'otxod': np.float64(0.0028)},
                       'B': { 'rasxod': np.float64(0.005),
                              'otxod': np.float64(0.0003)}},
   'прокат цветных металлов': { 'type': 'fixed',
@@ -61,7 +61,7 @@ volume_base_example = {"A": 195, "B": 60}
 # --- Входные коэффициенты ---
 Ka_input = 1.06 # Коэффициент для корректировки объема
 Kj_input = 0.92 # Пример
-Ktr_input = 1.15 # Пример из расчета
+Ktr_input = 1.15
 
 # --- Сохранение CSV ---
 csv_table_input = generate_input_table_csv(
