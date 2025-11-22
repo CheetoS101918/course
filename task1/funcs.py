@@ -786,7 +786,7 @@ def generate_input_table_csv(materials_main, materials_purchased, prices, fuel_e
     return csv_content
 
 
-def save_structure_table_to_json(structure_data_A, structure_data_B, filename="sebestoimost_structure.json"):
+def save_structure_table_to_json(structure_data_A, structure_data_B, filename="task1/sebestoimost_structure.json"):
     """
     Сохраняет итоговую таблицу структуры себестоимости в формате JSON.
 

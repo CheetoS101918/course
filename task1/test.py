@@ -69,12 +69,12 @@ csv_table_input = generate_input_table_csv(
     prices_example, fuel_energy_example, labor_example, rates_example,
     volume_base_example, Ka_input, Kj_input, Ktr_input
 )
-csv_input_filename = "input_data_table.csv"
+csv_input_filename = "task1/input_data_table.csv"
 with open(csv_input_filename, 'w', encoding='utf-8', newline='') as csvfile:
     csvfile.write(csv_table_input)
 
 to_js = csv_to_json_structure(csv_input_filename)
-with open("input_data_table.json", "w", encoding="utf-8") as f:
+with open("task1/input_data_table.json", "w", encoding="utf-8") as f:
     json.dump(to_js, f, ensure_ascii=False, indent=4)
 
 
@@ -152,7 +152,7 @@ output_result = generate_output_by_punkt(structure_data_A, structure_data_B, det
 csv_table_content = generate_structure_table_csv(structure_data_A, structure_data_B)
 
 # Сохранение CSV в файл
-csv_filename = "sebestoimost_structure.csv"
+csv_filename = "task1/sebestoimost_structure.csv"
 with open(csv_filename, 'w', encoding='utf-8', newline='') as csvfile:
     csvfile.write(csv_table_content)
 
@@ -203,7 +203,7 @@ other = {
 }
 
 # Сохраняем в JSON файл (например, список из двух словарей)
-individual_volumes_json_filename = "individual_product_volumes.json"
+individual_volumes_json_filename = "task1/individual_product_volumes.json"
 with open(individual_volumes_json_filename, 'w', encoding='utf-8') as jsonfile:
     # Записываем оба изделия в один файл как список
     json.dump([individual_volumes_data, individual_volumes_data_B, other], jsonfile, indent=4, ensure_ascii=False)

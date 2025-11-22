@@ -3,6 +3,32 @@ from docx import Document
 from docx.shared import Inches, Pt
 from docx.enum.style import WD_STYLE_TYPE
 import sys
+import numpy as np
+
+
+def simple_clean_zeros(df):
+    """Превращает целые float-ы (5.0, 10.0 и т.д.) в int, остальное оставляет как есть"""
+    def format_number(x):
+        if pd.isna(x):
+            return x
+        try:
+            num = float(x)
+            # Если число целое — возвращаем int, иначе оставляем float
+            return int(num) if num.is_integer() else num
+        except (ValueError, TypeError, OverflowError):
+            return x
+    return df.map(format_number)  # map, а не applymap (applymap устарел в новых pandas)
+    
+
+def value_to_string(val):
+    """Надёжно убирает .0 у целых чисел, даже если они пришли как float"""
+    if pd.isna(val):
+        return ""
+    if isinstance(val, float):
+        if val.is_integer():
+            return str(int(val))
+        return str(val).rstrip('0').rstrip('.')  # убирает лишние нули и точку у 10.50 → 10.5
+    return str(val)
 
 
 def create_custom_style(doc):
@@ -31,6 +57,7 @@ def create_custom_style(doc):
 
     return style_name
 
+
 def create_docx_from_csv(csv_file, output_file=None):
     """
     Создаёт DOCX-документ с таблицей из CSV-файла.
@@ -44,7 +71,9 @@ def create_docx_from_csv(csv_file, output_file=None):
         str: Путь к сохранённому файлу.
     """
     # Шаг 1: Читаем CSV
-    df = pd.read_csv(csv_file, sep=';')
+    df1 = pd.read_csv(csv_file, sep=';')
+
+    df = simple_clean_zeros(df1) # очистка от грёбаных .0
 
     # Шаг 2: Генерируем имя выходного файла, если не указано
     if output_file is None:
@@ -71,9 +100,7 @@ def create_docx_from_csv(csv_file, output_file=None):
     for i, row in df.iterrows():
         for j, value in enumerate(row):
             cell = table.cell(i + 1, j)
-            clean_value = str(value).strip() if pd.notna(value) else ""
-            cell.text = clean_value
-            # !!! 2. Применяем стиль к каждой ячейке
+            cell.text = value_to_string(value)      # ← вот тут магия
             cell.paragraphs[0].style = doc.styles[table_style_name]
 
     # Шаг 7: Настраиваем ширину столбцов
