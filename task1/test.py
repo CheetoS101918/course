@@ -63,7 +63,7 @@ rates_example = {
     "ВПР": 3,
     "рентабельность": 22
 }
-volume_base_example = {"A": 195, "B": 60}
+volume_base_example = {"A": 98, "B": 65}
 
 # --- Входные коэффициенты ---
 Ka_input = 1.08
@@ -166,7 +166,7 @@ with open(csv_filename, 'w', encoding='utf-8', newline='') as csvfile:
 print(f"\nCSV таблица сохранена в файл: {csv_filename}")
 
 
-Q_t, Q_p, Q_A, Q_B, price_A, price_B = calculate_product_volumes(structure_data_A, structure_data_B)
+Q_t, Q_p, Q_A, Q_B, price_A, price_B = calculate_product_volumes(structure_data_A, structure_data_B, Ka_input)
 
 # Формируем и выводим расчет для объемов продукции
 volumes_output = "\n--- Расчет объемов продукции ---\n"

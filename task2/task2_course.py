@@ -7,7 +7,7 @@ def main():
 
     # 1. Укажите путь к файлу и номер варианта
     file_path = '../dopolneniya_tables/dop_L.csv'
-    current_variant = 2
+    current_variant = 3
 
     # 2. Получаем данные
     data = get_variant_data(file_path, current_variant)

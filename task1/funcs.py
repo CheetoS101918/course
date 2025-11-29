@@ -1,6 +1,7 @@
 import csv
 import io
 import json
+from math import ceil
 from typing import List, Dict, Any
 
 
@@ -661,14 +662,14 @@ def calculate_opt_price(full_cost, profit):
     return opt_price
 
 
-def calculate_product_volumes(structure_data_A, structure_data_B):
+def calculate_product_volumes(structure_data_A, structure_data_B, Ka):
     """
     Рассчитывает объем товарной и реализованной продукции.
     Использует данные из structure_data_A и structure_data_B.
     """
     # Годовые объемы выпуска
-    Q_A = structure_data_A["Q"]
-    Q_B = structure_data_B["Q"]
+    Q_A = ceil(structure_data_A["Q"] / Ka)
+    Q_B = ceil(structure_data_B["Q"] / Ka)
 
     # Оптовые цены
     price_A = structure_data_A["Оптовая_цена"]

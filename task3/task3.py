@@ -112,7 +112,7 @@ def print_full_variables(file_path, variant_task):
 
 # Укажите путь к файлу и номер варианта (1 или 2)
 file_name = '../dopolneniya_tables/dop_N.csv'
-my_variant = 2
+my_variant = 3
 
 data = load_production_data(file_name, my_variant)
 
@@ -120,7 +120,7 @@ if isinstance(data, dict):
     # Присваиваем переменным значения из словаря (глобально)
     globals().update(data)
 
-current_variant = 2
+current_variant = 3
 print_full_variables(file_name, current_variant)
 
 
