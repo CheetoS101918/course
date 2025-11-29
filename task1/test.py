@@ -29,7 +29,7 @@ materials_purchased_example = {
                                 'A': { 'rasxod': np.float64(0.32),
                                        'otxod': np.float64(0.0736)},
                                 'B': { 'rasxod': np.float64(0.28),
-                                       'otxod': np.float64(0.0504)}}
+                                       'otxod': np.float64(0.0504)}},
     "покупные комплектующие изделия": {"type": "fixed", 'A': np.int64(136800), 'B': np.int64(118300)}
 }
 
