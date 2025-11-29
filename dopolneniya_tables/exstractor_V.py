@@ -36,7 +36,7 @@ def extract_purchased_sums(variant: int, pretty_print: bool = True):
 
 
 # Пример использования с красивой печатью (по умолчанию):
-extract_purchased_sums(1)
+extract_purchased_sums(3)
 
 # Если хочешь просто вернуть словарь (без печати):
 # sums_data = extract_purchased_sums(1, pretty_print=False)

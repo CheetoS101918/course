@@ -53,7 +53,7 @@ def extract_labor_data(variant: int, pretty_print: bool = True):
 
 
 # Пример использования с красивой печатью (по умолчанию):
-extract_labor_data(1)
+extract_labor_data(3)
 
 # С Кж=1.2, например:
 # extract_labor_data(1, k_zh=1.2)
