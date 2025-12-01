@@ -22,82 +22,131 @@ class CostCalculator:
         self.Ka = 1.04  # коэффициент для объема производства
         self.Ktr = 1.15  # транспортно-заготовительные расходы
 
-        # Данные по проектам из таблицы 2.1 примера
+        # Данные по проектам из таблицы 2.1 примера (Исходные данные для экономического обоснования варианта проекта)
         self.projects_data = {
             "project_1": {
                 "name": "Проект 1",
-                "annual_volume_base": 330,  # шт
-                "annual_volume_corrected": round(330 * 1.04),  # Q(A) = 330 * 1.04 = 344 шт
-                # Снижение норм расходов (%)
-                "steel_rolling_reduction": 7,
-                "steel_pipes_reduction": 12,
-                "castings_reduction": 15,
+                "annual_volume_base": 330,  # шт - Годовой объем производства (строка 1 таблицы 2.1)
+                "annual_volume_corrected": round(330 * self.Ka),
+                # Q(A) = 330 * 1.04 = 344 шт - скорректированный объем с коэффициентом Ка
+                # Снижение норм расходов (%) - раздел "К расчету себестоимости продукции" таблицы 2.1
+                "steel_rolling_reduction": 7,  # % - Снижение норм расходов: стального проката (строка 2.1)
+                "steel_pipes_reduction": 12,  # % - Снижение норм расходов: стальных труб (строка 2.2)
+                "castings_reduction": 15,  # % - Снижение норм расходов: отливок черных и цветных металлов (строка 2.3)
                 "other_materials_reduction": 9,
-                "labor_intensity_reduction": 12,
-                # Капитальные затраты (тыс. руб)
-                "design_survey_cost": 1800,
-                "fixed_assets_investment": 16000,
+                # % - Снижение расходов и стоимости других материалов и комплектующих (строка 3)
+                "labor_intensity_reduction": 12,  # % - Снижение трудоемкости (строка 4)
+                # Капитальные затраты (тыс. руб) - раздел "Капитальные затраты" таблицы 2.1
+                "design_survey_cost": 1800,  # тыс.руб - Расходы на проектно-изыскательские работы (Кпир) (строка 5)
+                "fixed_assets_investment": 16000,  # тыс.руб - Капитальные вложения в основные фонды (Косн) (строка 6)
                 "startup_cost": 2000,
+                # тыс.руб - Расходы, связанные с пуском, наладкой и освоением производства (Косв) (строка 7)
                 "residual_value_percent": 1.13
+                # % - Остаточная стоимость основных фондов, которые должны пойти на слом (Кл) (строка 8)
             },
             "project_2": {
                 "name": "Проект 2",
-                "annual_volume_base": 350,
-                "annual_volume_corrected": round(350 * 1.04),  # Q(A) = 350 * 1.04 = 364 шт
-                # Снижение норм расходов (%)
-                "steel_rolling_reduction": 6,
-                "steel_pipes_reduction": 14,
-                "castings_reduction": 13,
-                "other_materials_reduction": 7,
-                "labor_intensity_reduction": 10,
-                # Капитальные затраты (тыс. руб)
-                "design_survey_cost": 1900,
-                "fixed_assets_investment": 17000,
-                "startup_cost": 2500,
-                "residual_value_percent": 1.14
+                "annual_volume_base": 350,  # шт - Годовой объем производства (строка 1 таблицы 2.1)
+                "annual_volume_corrected": round(350 * self.Ka),  # Q(A) = 350 * 1.04 = 364 шт - скорректированный объем
+                # Снижение норм расходов (%) - значения для Проекта 2 из таблицы 2.1
+                "steel_rolling_reduction": 6,  # % - стального проката
+                "steel_pipes_reduction": 14,  # % - стальных труб
+                "castings_reduction": 13,  # % - отливок черных и цветных металлов
+                "other_materials_reduction": 7,  # % - других материалов и комплектующих
+                "labor_intensity_reduction": 10,  # % - трудоемкости
+                # Капитальные затраты (тыс. руб) - значения для Проекта 2 из таблицы 2.1
+                "design_survey_cost": 1900,  # тыс.руб - Кпир
+                "fixed_assets_investment": 17000,  # тыс.руб - Косн
+                "startup_cost": 2500,  # тыс.руб - Косв
+                "residual_value_percent": 1.14  # % - Кл
             }
         }
 
-        # Данные для расчета себестоимости (таблица 2.3)
+        # Данные для расчета себестоимости (таблица 2.3 - "Данные для расчета себестоимости, прибыли и цены изделия по проектам")
         self.cost_calculation_data = {
             "project_1": {
-                # Основные материалы
-                "steel_rolling_consumption": 0.5766,  # т
-                "steel_rolling_waste": 0.10379,  # т
-                "steel_pipes_consumption": 0.0528,  # т
-                "steel_pipes_waste": 0.00370,  # т
-                "nonferrous_rolling": 2275,  # руб
-                "other_materials": 728,  # руб
+                # ОСНОВНЫЕ МАТЕРИАЛЫ (раздел 1 таблицы 2.3)
+                "steel_rolling_consumption": 0.5766,  # т - расходы стального проката (пункт 1.1)
+                "steel_rolling_waste": 0.10379,  # т - отходы стального проката (пункт 1.1)
+                "steel_pipes_consumption": 0.0528,  # т - расходы стальных труб (пункт 1.2)
+                "steel_pipes_waste": 0.00370,  # т - отходы стальных труб (пункт 1.2)
+                "nonferrous_rolling": 2275,  # руб - прокат цветных металлов (пункт 1.3)
+                "other_materials": 728,  # руб - другие материалы (пункт 1.4)
 
-                # Покупные полуфабрикаты
-                "castings_black_consumption": 2.21,  # т
-                "castings_black_waste": 0.3978,  # т
-                "castings_color_consumption": 0.272,  # т
-                "castings_color_waste": 0.06256,  # т
+                # ПОКУПНЫЕ ПОЛУФАБРИКАТЫ (раздел 2 таблицы 2.3)
+                "castings_black_consumption": 2.21,  # т - расходы отливок черных металлов (пункт 2.1)
+                "castings_black_waste": 0.3978,  # т - отходы отливок черных металлов (пункт 2.1)
+                "castings_color_consumption": 0.272,  # т - расходы отливок цветных металлов (пункт 2.2)
+                "castings_color_waste": 0.06256,  # т - отходы отливок цветных металлов (пункт 2.2)
 
-                # Комплектующие
-                "purchased_components": 124488,  # руб
+                # КОМПЛЕКТУЮЩИЕ (раздел 3 таблицы 2.3)
+                "purchased_components": 124488,  # руб - покупные комплектующие изделия (пункт 3)
 
-                # Цены материалов
-                "price_steel_rolling": 12800,  # руб/т
-                "price_steel_pipes": 18500,  # руб/т
-                "price_castings_black": 10500,  # руб/т
-                "price_castings_color": 22600,  # руб/т
+                # ЦЕНЫ МАТЕРИАЛОВ (разделы 4-6 таблицы 2.3)
+                "price_steel_rolling": 12800,  # руб/т - цена стального проката (пункт 4)
+                "price_steel_pipes": 18500,  # руб/т - цена стальных труб (пункт 5)
+                "price_castings_black": 10500,  # руб/т - цена отливок черных металлов (пункт 6)
+                "price_castings_color": 22600,  # руб/т - цена отливок цветных металлов (пункт 6)
 
-                # Цены отходов
-                "price_waste_steel_rolling": 7500,  # руб/т
-                "price_waste_steel_pipes": 6300,  # руб/т
-                "price_waste_castings_black": 7200,  # руб/т
-                "price_waste_castings_color": 16900,  # руб/т
+                # ЦЕНЫ ОТХОДОВ (раздел 7 таблицы 2.3)
+                "price_waste_steel_rolling": 7500,  # руб/т - цена отходов стального проката (пункт 7)
+                "price_waste_steel_pipes": 6300,  # руб/т - цена отходов труб стальных (пункт 7)
+                "price_waste_castings_black": 7200,  # руб/т - цена отходов отливок черных металлов (пункт 7)
+                "price_waste_castings_color": 16900,  # руб/т - цена отходов отливок цветных металлов (пункт 7)
 
-                # Топливо и энергия (%)
-                "fuel_energy_percent": 1.6,
+                # ТОПЛИВО И ЭНЕРГИЯ (раздел 8 таблицы 2.3)
+                "fuel_energy_percent": 1.6,  # % - топливо и энергия на технологические потребности (пункт 8)
 
-                # Трудоемкость и зарплата
-                "labor_intensity": 785.84,  # н-час
-                "hourly_rate": 41.50,  # руб
+                # ТРУДОЕМКОСТЬ И ЗАРПЛАТА (разделы 9-10 таблицы 2.3)
+                "labor_intensity": 785.84,  # н-час - суммарная трудоемкость изделия (пункт 9)
+                "hourly_rate": 41.50,  # руб - часовая тарифная ставка (пункт 10)
 
-                # Проценты для расчетов
+                # ПРОЦЕНТЫ ДЛЯ РАСЧЕТОВ (разделы 11-17 таблицы 2.3)
+                "additional_salary_percent": 40,  # % - дополнительная зарплата (пункт 11)
+                "social_insurance_percent": 22,  # % - отчисление на социальное страхование (пункт 12)
+                "equipment_maintenance_percent": 80,  # % - расходы на содержание и эксплуатацию оборудования (пункт 13)
+                "overhead_production_percent": 90,  # % - общепроизводственные расходы (пункт 14)
+                "general_business_percent": 110,  # % - общехозяйственные расходы (пункт 15)
+                "non_production_percent": 3,  # % - внепроизводственные расходы (пункт 16)
+                "profitability_percent": 22  # % - норматив рентабельности к себестоимости (пункт 17)
+                # Примечание: Годовой объем производства (пункт 18) хранится в projects_data
+            },
+            "project_2": {
+                # ОСНОВНЫЕ МАТЕРИАЛЫ для Проекта 2 (таблица 2.3, колонка Проект 2)
+                "steel_rolling_consumption": 0.5828,  # т - скорректированный расход стального проката
+                "steel_rolling_waste": 0.104904,  # т - скорректированные отходы стального проката
+                "steel_pipes_consumption": 0.0516,  # т - скорректированный расход стальных труб
+                "steel_pipes_waste": 0.003612,  # т - скорректированные отходы стальных труб
+                "nonferrous_rolling": 2325,  # руб - скорректированный прокат цветных металлов
+                "other_materials": 744,  # руб - скорректированные другие материалы
+
+                # ПОКУПНЫЕ ПОЛУФАБРИКАТЫ для Проекта 2
+                "castings_black_consumption": 2.262,  # т - скорректированные расходы отливок черных металлов
+                "castings_black_waste": 0.40716,  # т - скорректированные отходы отливок черных металлов
+                "castings_color_consumption": 0.2784,  # т - скорректированные расходы отливок цветных металлов
+                "castings_color_waste": 0.064032,  # т - скорректированные отходы отливок цветных металлов
+
+                # КОМПЛЕКТУЮЩИЕ для Проекта 2
+                "purchased_components": 127224,  # руб - скорректированные покупные комплектующие
+
+                # ЦЕНЫ МАТЕРИАЛОВ и ОТХОДОВ (одинаковые для обоих проектов)
+                "price_steel_rolling": 12800,  # руб/т - цена стального проката
+                "price_steel_pipes": 18500,  # руб/т - цена стальных труб
+                "price_castings_black": 10500,  # руб/т - цена отливок черных металлов
+                "price_castings_color": 22600,  # руб/т - цена отливок цветных металлов
+                "price_waste_steel_rolling": 7500,  # руб/т - цена отходов стального проката
+                "price_waste_steel_pipes": 6300,  # руб/т - цена отходов труб стальных
+                "price_waste_castings_black": 7200,  # руб/т - цена отходов отливок черных металлов
+                "price_waste_castings_color": 16900,  # руб/т - цена отходов отливок цветных металлов
+
+                # ТОПЛИВО И ЭНЕРГИЯ (одинаковое для обоих проектов)
+                "fuel_energy_percent": 1.6,  # %
+
+                # ТРУДОЕМКОСТЬ И ЗАРПЛАТА для Проекта 2
+                "labor_intensity": 803.70,  # н-час - скорректированная трудоемкость
+                "hourly_rate": 41.50,  # руб - часовая тарифная ставка (та же)
+
+                # ПРОЦЕНТЫ ДЛЯ РАСЧЕТОВ (одинаковые для обоих проектов)
                 "additional_salary_percent": 40,  # %
                 "social_insurance_percent": 22,  # %
                 "equipment_maintenance_percent": 80,  # %
@@ -105,52 +154,6 @@ class CostCalculator:
                 "general_business_percent": 110,  # %
                 "non_production_percent": 3,  # %
                 "profitability_percent": 22  # %
-            },
-            "project_2": {
-                # Основные материалы
-                "steel_rolling_consumption": 0.5828,
-                "steel_rolling_waste": 0.104904,
-                "steel_pipes_consumption": 0.0516,
-                "steel_pipes_waste": 0.003612,
-                "nonferrous_rolling": 2325,
-                "other_materials": 744,
-
-                # Покупные полуфабрикаты
-                "castings_black_consumption": 2.262,
-                "castings_black_waste": 0.40716,
-                "castings_color_consumption": 0.2784,
-                "castings_color_waste": 0.064032,
-
-                # Комплектующие
-                "purchased_components": 127224,
-
-                # Цены (те же, что и в проекте 1)
-                "price_steel_rolling": 12800,
-                "price_steel_pipes": 18500,
-                "price_castings_black": 10500,
-                "price_castings_color": 22600,
-
-                # Цены отходов
-                "price_waste_steel_rolling": 7500,
-                "price_waste_steel_pipes": 6300,
-                "price_waste_castings_black": 7200,
-                "price_waste_castings_color": 16900,
-
-                # Топливо и энергия (%)
-                "fuel_energy_percent": 1.6,
-
-                # Трудоемкость и зарплата
-                "labor_intensity": 803.70,
-                "hourly_rate": 41.50,
-
-                # Проценты
-                "additional_salary_percent": 40,
-                "social_insurance_percent": 22,
-                "equipment_maintenance_percent": 80,
-                "overhead_production_percent": 90,
-                "general_business_percent": 110,
-                "non_production_percent": 3,
-                "profitability_percent": 22
             }
         }
 
