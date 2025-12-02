@@ -18,9 +18,9 @@ def extract_labor_data(variant: int, pretty_print: bool = True):
         dict: Словарь как в примере (если pretty_print=False).
     """
     # Читаем CSV для часов
-    df_hours = pd.read_csv('dop_J_hours.csv')
+    df_hours = pd.read_csv('../dopolneniya_tables/dop_J_hours.csv')
     # Читаем CSV для разрядов
-    df_grades = pd.read_csv('dop_J_grades.csv')
+    df_grades = pd.read_csv('../dopolneniya_tables/dop_J_grades.csv')
 
     # Проверяем наличие столбца для варианта
     variant_col = str(variant)

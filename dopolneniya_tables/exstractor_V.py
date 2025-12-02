@@ -14,7 +14,7 @@ def extract_purchased_sums(variant: int, pretty_print: bool = True):
         dict: Словарь {"A": sum_A, "B": sum_B} (если pretty_print=False).
     """
     # Читаем CSV файл
-    df = pd.read_csv('dop_V.csv')
+    df = pd.read_csv('../dopolneniya_tables/dop_V.csv')
 
     # Проверяем наличие столбца для варианта
     variant_col = str(variant)
@@ -36,7 +36,7 @@ def extract_purchased_sums(variant: int, pretty_print: bool = True):
 
 
 # Пример использования с красивой печатью (по умолчанию):
-extract_purchased_sums(1)
+extract_purchased_sums(2)
 
 # Если хочешь просто вернуть словарь (без печати):
 # sums_data = extract_purchased_sums(1, pretty_print=False)

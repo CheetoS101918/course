@@ -14,7 +14,7 @@ def extract_materials_data(variant: int, pretty_print: bool = True):
         tuple: Кортеж из двух словарей - materials_main и materials_purchased (если pretty_print=False).
     """
     # Читаем CSV файл
-    df = pd.read_csv('dop_B.csv')
+    df = pd.read_csv('../dopolneniya_tables/dop_B.csv')
 
     # Фильтруем по варианту
     variant_df = df[df['Вариант'] == variant]
