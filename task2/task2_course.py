@@ -357,16 +357,16 @@ def main():
     F_n = total_nachalo
     F_vv = stoimost_vvodimyh
     F_vyv = stoimost_vyvodimyh
-    t_vvoda = 12 - mes_vvoda + 1 # 7
-    t_vyvoda = 12 - mes_vyvoda + 1 # 3
+    t_vvoda = 12 - mes_vvoda
+    t_vyvoda = 12 - mes_vyvoda
 
     print(f"Формула (1.9): Фср.г = Фн + (Фвв * tвв) / 12 - (Фвыв * tвыв) / 12")
     print(f"Где:")
     print(f"- Фн (стоимость на начало года) = {F_n:.3f} тыс. руб.")
     print(f"- Фвв (стоимость вводимых фондов) = {F_vv:.3f} тыс. руб.")
     print(f"- Фвыв (стоимость выводимых фондов) = {F_vyv:.3f} тыс. руб.")
-    print(f"- tвв (месяцы функционирования вводимых фондов) = 12 - {mes_vvoda} + 1 = {t_vvoda}")
-    print(f"- tвыв (месяцы после вывода) = 12 - {mes_vyvoda} + 1 = {t_vyvoda}")
+    print(f"- tвв (месяцы функционирования вводимых фондов) = 12 - {mes_vvoda} = {t_vvoda}")
+    print(f"- tвыв (месяцы после вывода) = 12 - {mes_vyvoda} = {t_vyvoda}")
 
     F_sr_g = F_n + (F_vv * t_vvoda) / 12 - (F_vyv * t_vyvoda) / 12
     print(f"Расчёт: {F_n:.3f} + ({F_vv:.3f} * {t_vvoda}) / 12 - ({F_vyv:.3f} * {t_vyvoda}) / 12 = {F_sr_g:.3f} тыс. руб.")
