@@ -7,6 +7,9 @@ import csv
 import math
 from typing import Dict, List, Tuple, Any
 import os
+import json
+from datetime import datetime
+
 
 class CostCalculator:
     """Класс для расчета себестоимости продукции"""
@@ -579,6 +582,15 @@ class CostCalculator:
             print(f"   {wholesale_price:,.2f} руб./ед. × {annual_volume} шт. / 1000")
             print(f"   = {commodity_output:,.2f} тыс. руб.")
 
+            initial_stock = commodity_output * 0.02  # 2% от товарной продукции
+            final_stock = commodity_output * 0.015  # 1.5% от товарной продукции
+            realized_output = initial_stock + commodity_output - final_stock
+
+            print(f"\n   Объем реализованной продукции (Qр):")
+            print(f"   Qн = {initial_stock:,.2f} тыс.руб. (2% от Qт)")
+            print(f"   Qк = {final_stock:,.2f} тыс.руб. (1.5% от Qт)")
+            print(f"   Qр = Qн + Qт - Qк = {realized_output:,.2f} тыс. руб.")
+
 
             # Сохраняем результаты
             self.calculation_results[project_key]["annual_costs"] = {
@@ -597,6 +609,9 @@ class CostCalculator:
                 "profit": annual_profit,
                 "commodity_output": commodity_output
             }
+
+            # Сохраняем в результаты
+            self.calculation_results[project_key]["annual_costs"]["realized_output"] = realized_output
 
             print(f"\n{'═'*80}")
             print(f"ИТОГОВЫЕ РЕЗУЛЬТАТЫ ДЛЯ {project_name}")
@@ -898,6 +913,44 @@ class CostCalculator:
         print(f"Таблица 2.3 сохранена в файл: {filename}")
         return filename
 
+    def save_production_volumes_to_json(self, filename="объемы_продукции.json"):
+        """
+        Сохранение объемов товарной и реализованной продукции в JSON
+
+        Args:
+            filename: Имя JSON файла
+        """
+        data = {
+            "project_1": {
+                "name": "Проект 1",
+                "commodity_output": self.calculation_results["project_1"]["annual_costs"]["commodity_output"],
+                "realized_output": self.calculation_results["project_1"]["annual_costs"].get("realized_output", 0)
+            },
+            "project_2": {
+                "name": "Проект 2",
+                "commodity_output": self.calculation_results["project_2"]["annual_costs"]["commodity_output"],
+                "realized_output": self.calculation_results["project_2"]["annual_costs"].get("realized_output", 0)
+            },
+            "total": {
+                "total_commodity_output": self.calculation_results["project_1"]["annual_costs"]["commodity_output"] +
+                                          self.calculation_results["project_2"]["annual_costs"]["commodity_output"],
+                "total_realized_output": (
+                            self.calculation_results["project_1"]["annual_costs"].get("realized_output", 0) +
+                            self.calculation_results["project_2"]["annual_costs"].get("realized_output", 0))
+            },
+            "metadata": {
+                "variant": 3,
+                "calculation_date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "currency": "тыс. руб."
+            }
+        }
+
+        with open(filename, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+
+        print(f"Объемы продукции сохранены в JSON файл: {filename}")
+        return data
+
     # def create_verification_report(self):
     #     """Создание отчета проверки расчетов"""
     #
@@ -1051,18 +1104,33 @@ def main():
     calculator.create_input_data_table_2_3()
     calculator.create_cost_table_2_4()
 
+    # Сохраняем объемы продукции в JSON
+    volumes_data = calculator.save_production_volumes_to_json()
+
     # Проверяем расчеты
     #ismatches = calculator.create_verification_report()
 
-    print(f"\n{'='*80}")
+    # Выводим сводку по объемам
+    print(f"\n{'═' * 80}")
+    print("СВОДКА ОБЪЕМОВ ПРОДУКЦИИ:")
+    print(f"{'═' * 80}")
+    print(f"Проект 1 - Товарная: {volumes_data['project_1']['commodity_output']:,.2f} тыс.руб.")
+    print(f"Проект 1 - Реализованная: {volumes_data['project_1']['realized_output']:,.2f} тыс.руб.")
+    print(f"Проект 2 - Товарная: {volumes_data['project_2']['commodity_output']:,.2f} тыс.руб.")
+    print(f"Проект 2 - Реализованная: {volumes_data['project_2']['realized_output']:,.2f} тыс.руб.")
+    print(f"Итого товарная: {volumes_data['total']['total_commodity_output']:,.2f} тыс.руб.")
+    print(f"Итого реализованная: {volumes_data['total']['total_realized_output']:,.2f} тыс.руб.")
+
+    print(f"\n{'=' * 80}")
     print("ЭТАП 1 ЗАВЕРШЕН")
-    print("="*80)
+    print("=" * 80)
     print("Созданы файлы:")
     print("  - таблица_2_3_данные_для_расчета.csv")
     print("  - таблица_2_4_себестоимость.csv")
     print("  - проверка_расчетов.csv")
-   # print(f"\nРезультат проверки: {mismatches} расхождений с примером студента")
-    print("="*80)
+    print("  - объемы_продукции.json")
+#    print(f"\nРезультат проверки: {mismatches} расхождений с примером студента")
+    print("=" * 80)
 
 if __name__ == "__main__":
     main()
