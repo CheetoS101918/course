@@ -579,6 +579,7 @@ class CostCalculator:
             print(f"   {wholesale_price:,.2f} руб./ед. × {annual_volume} шт. / 1000")
             print(f"   = {commodity_output:,.2f} тыс. руб.")
 
+
             # Сохраняем результаты
             self.calculation_results[project_key]["annual_costs"] = {
                 "material": annual_material,
@@ -897,139 +898,139 @@ class CostCalculator:
         print(f"Таблица 2.3 сохранена в файл: {filename}")
         return filename
 
-    def create_verification_report(self):
-        """Создание отчета проверки расчетов"""
-
-        # Данные из примера студента (для проверки)
-        student_data_project1 = {
-            "material_costs": 11812.14,
-            "semi_components": 154321.606,
-            "fuel_energy": 2701.36,
-            "basic_salary": 32612.36,
-            "additional_salary": 13044.944,
-            "social_insurance": 10044.61,
-            "equipment_maintenance": 26089.89,
-            "overhead_production": 29351.12,
-            "general_business": 35873.60,
-            "production_cost": 315851.87,
-            "non_production": 9475.55,
-            "full_cost": 325327.42,
-            "profit": 71572.03,
-            "wholesale_price": 396899.45,
-            "annual_material": 4063.37,
-            "annual_semi": 53086.63,
-            "annual_fuel": 929.26,
-            "annual_basic_salary": 11218.65,
-            "annual_additional_salary": 4487.46,
-            "annual_social": 3455.34,
-            "annual_equipment": 8974.92,
-            "annual_overhead": 10096.78,
-            "annual_general": 12340.51,
-            "annual_production": 108653.04,
-            "annual_non_production": 3259.59,
-            "annual_full_cost": 111912.64,
-            "annual_profit": 24620.78
-        }
-
-        student_data_project2 = {
-            "material_costs": 11936.07,
-            "semi_components": 157759.57,
-            "fuel_energy": 2759.27,
-            "basic_salary": 33353.55,
-            "additional_salary": 13341.42,
-            "social_insurance": 10272.89,
-            "equipment_maintenance": 26682.84,
-            "overhead_production": 30018.20,
-            "general_business": 36688.91,
-            "production_cost": 322812.72,
-            "non_production": 9684.38,
-            "full_cost": 332497.10,
-            "profit": 73149.36,
-            "wholesale_price": 405646.46
-        }
-
-        print(f"\n{'═'*80}")
-        print("ПРОВЕРКА РАСЧЕТОВ")
-        print("(сравнение с данными из примера студента)")
-        print(f"{'═'*80}")
-
-        # Проверяем Проект 1
-        print(f"\n{'═'*80}")
-        print("ПРОЕКТ 1 - СРАВНЕНИЕ С ПРИМЕРОМ СТУДЕНТА")
-        print(f"{'═'*80}")
-
-        mismatches = []
-
-        for key, student_value in student_data_project1.items():
-            if key in self.calculation_results["project_1"]:
-                our_value = self.calculation_results["project_1"][key]
-                difference = round(abs(our_value - student_value), 2)
-
-                if difference > 0.01:  # Допустимая погрешность
-                    mismatches.append((key, our_value, student_value, difference))
-                    print(f"  ❌ {key}: наш={our_value:.2f}, пример={student_value:.2f}, разница={difference:.2f}")
-                else:
-                    print(f"  ✅ {key}: наш={our_value:.2f}, пример={student_value:.2f} (совпадает)")
-
-        # Проверяем Проект 2
-        print(f"\n{'═'*80}")
-        print("ПРОЕКТ 2 - СРАВНЕНИЕ С ПРИМЕРОМ СТУДЕНТА")
-        print(f"{'═'*80}")
-
-        for key, student_value in student_data_project2.items():
-            if key in self.calculation_results["project_2"]:
-                our_value = self.calculation_results["project_2"][key]
-                difference = round(abs(our_value - student_value), 2)
-
-                if difference > 0.01:  # Допустимая погрешность
-                    mismatches.append((f"project_2_{key}", our_value, student_value, difference))
-                    print(f"  ❌ {key}: наш={our_value:.2f}, пример={student_value:.2f}, разница={difference:.2f}")
-                else:
-                    print(f"  ✅ {key}: наш={our_value:.2f}, пример={student_value:.2f} (совпадает)")
-
-        # Итог проверки
-        print(f"\n{'═'*80}")
-        print("ИТОГ ПРОВЕРКИ")
-        print(f"{'═'*80}")
-
-        if not mismatches:
-            print("✅ ВСЕ РАСЧЕТЫ СОВПАДАЮТ С ПРИМЕРОМ СТУДЕНТА!")
-        else:
-            print(f"⚠️  Обнаружено {len(mismatches)} расхождений:")
-            for mismatch in mismatches:
-                print(f"   - {mismatch[0]}: наш={mismatch[1]:.2f}, пример={mismatch[2]:.2f}, разница={mismatch[3]:.2f}")
-
-        # Создаем CSV файл с результатами проверки
-        filename = "проверка_расчетов.csv"
-
-        headers = ["Показатель", "Наш расчет", "Пример студента", "Разница", "Статус"]
-        rows = []
-
-        # Проект 1
-        for key, student_value in student_data_project1.items():
-            if key in self.calculation_results["project_1"]:
-                our_value = self.calculation_results["project_1"][key]
-                difference = round(abs(our_value - student_value), 2)
-                status = "Совпадает" if difference <= 0.01 else "Расхождение"
-                rows.append([f"Проект 1: {key}", f"{our_value:.2f}", f"{student_value:.2f}", f"{difference:.2f}", status])
-
-        # Проект 2
-        for key, student_value in student_data_project2.items():
-            if key in self.calculation_results["project_2"]:
-                our_value = self.calculation_results["project_2"][key]
-                difference = round(abs(our_value - student_value), 2)
-                status = "Совпадает" if difference <= 0.01 else "Расхождение"
-                rows.append([f"Проект 2: {key}", f"{our_value:.2f}", f"{student_value:.2f}", f"{difference:.2f}", status])
-
-        with open(filename, 'w', newline='', encoding='utf-8-sig') as csvfile:
-            writer = csv.writer(csvfile, delimiter=';')
-            writer.writerow(headers)
-            for row in rows:
-                writer.writerow(row)
-
-        print(f"\nОтчет проверки сохранен в файл: {filename}")
-
-        return len(mismatches)
+    # def create_verification_report(self):
+    #     """Создание отчета проверки расчетов"""
+    #
+    #     # Данные из примера студента (для проверки)
+    #     student_data_project1 = {
+    #         "material_costs": 11812.14,
+    #         "semi_components": 154321.606,
+    #         "fuel_energy": 2701.36,
+    #         "basic_salary": 32612.36,
+    #         "additional_salary": 13044.944,
+    #         "social_insurance": 10044.61,
+    #         "equipment_maintenance": 26089.89,
+    #         "overhead_production": 29351.12,
+    #         "general_business": 35873.60,
+    #         "production_cost": 315851.87,
+    #         "non_production": 9475.55,
+    #         "full_cost": 325327.42,
+    #         "profit": 71572.03,
+    #         "wholesale_price": 396899.45,
+    #         "annual_material": 4063.37,
+    #         "annual_semi": 53086.63,
+    #         "annual_fuel": 929.26,
+    #         "annual_basic_salary": 11218.65,
+    #         "annual_additional_salary": 4487.46,
+    #         "annual_social": 3455.34,
+    #         "annual_equipment": 8974.92,
+    #         "annual_overhead": 10096.78,
+    #         "annual_general": 12340.51,
+    #         "annual_production": 108653.04,
+    #         "annual_non_production": 3259.59,
+    #         "annual_full_cost": 111912.64,
+    #         "annual_profit": 24620.78
+    #     }
+    #
+    #     student_data_project2 = {
+    #         "material_costs": 11936.07,
+    #         "semi_components": 157759.57,
+    #         "fuel_energy": 2759.27,
+    #         "basic_salary": 33353.55,
+    #         "additional_salary": 13341.42,
+    #         "social_insurance": 10272.89,
+    #         "equipment_maintenance": 26682.84,
+    #         "overhead_production": 30018.20,
+    #         "general_business": 36688.91,
+    #         "production_cost": 322812.72,
+    #         "non_production": 9684.38,
+    #         "full_cost": 332497.10,
+    #         "profit": 73149.36,
+    #         "wholesale_price": 405646.46
+    #     }
+    #
+    #     print(f"\n{'═'*80}")
+    #     print("ПРОВЕРКА РАСЧЕТОВ")
+    #     print("(сравнение с данными из примера студента)")
+    #     print(f"{'═'*80}")
+    #
+    #     # Проверяем Проект 1
+    #     print(f"\n{'═'*80}")
+    #     print("ПРОЕКТ 1 - СРАВНЕНИЕ С ПРИМЕРОМ СТУДЕНТА")
+    #     print(f"{'═'*80}")
+    #
+    #     mismatches = []
+    #
+    #     for key, student_value in student_data_project1.items():
+    #         if key in self.calculation_results["project_1"]:
+    #             our_value = self.calculation_results["project_1"][key]
+    #             difference = round(abs(our_value - student_value), 2)
+    #
+    #             if difference > 0.01:  # Допустимая погрешность
+    #                 mismatches.append((key, our_value, student_value, difference))
+    #                 print(f"  ❌ {key}: наш={our_value:.2f}, пример={student_value:.2f}, разница={difference:.2f}")
+    #             else:
+    #                 print(f"  ✅ {key}: наш={our_value:.2f}, пример={student_value:.2f} (совпадает)")
+    #
+    #     # Проверяем Проект 2
+    #     print(f"\n{'═'*80}")
+    #     print("ПРОЕКТ 2 - СРАВНЕНИЕ С ПРИМЕРОМ СТУДЕНТА")
+    #     print(f"{'═'*80}")
+    #
+    #     for key, student_value in student_data_project2.items():
+    #         if key in self.calculation_results["project_2"]:
+    #             our_value = self.calculation_results["project_2"][key]
+    #             difference = round(abs(our_value - student_value), 2)
+    #
+    #             if difference > 0.01:  # Допустимая погрешность
+    #                 mismatches.append((f"project_2_{key}", our_value, student_value, difference))
+    #                 print(f"  ❌ {key}: наш={our_value:.2f}, пример={student_value:.2f}, разница={difference:.2f}")
+    #             else:
+    #                 print(f"  ✅ {key}: наш={our_value:.2f}, пример={student_value:.2f} (совпадает)")
+    #
+    #     # Итог проверки
+    #     print(f"\n{'═'*80}")
+    #     print("ИТОГ ПРОВЕРКИ")
+    #     print(f"{'═'*80}")
+    #
+    #     if not mismatches:
+    #         print("✅ ВСЕ РАСЧЕТЫ СОВПАДАЮТ С ПРИМЕРОМ СТУДЕНТА!")
+    #     else:
+    #         print(f"⚠️  Обнаружено {len(mismatches)} расхождений:")
+    #         for mismatch in mismatches:
+    #             print(f"   - {mismatch[0]}: наш={mismatch[1]:.2f}, пример={mismatch[2]:.2f}, разница={mismatch[3]:.2f}")
+    #
+    #     # Создаем CSV файл с результатами проверки
+    #     filename = "проверка_расчетов.csv"
+    #
+    #     headers = ["Показатель", "Наш расчет", "Пример студента", "Разница", "Статус"]
+    #     rows = []
+    #
+    #     # Проект 1
+    #     for key, student_value in student_data_project1.items():
+    #         if key in self.calculation_results["project_1"]:
+    #             our_value = self.calculation_results["project_1"][key]
+    #             difference = round(abs(our_value - student_value), 2)
+    #             status = "Совпадает" if difference <= 0.01 else "Расхождение"
+    #             rows.append([f"Проект 1: {key}", f"{our_value:.2f}", f"{student_value:.2f}", f"{difference:.2f}", status])
+    #
+    #     # Проект 2
+    #     for key, student_value in student_data_project2.items():
+    #         if key in self.calculation_results["project_2"]:
+    #             our_value = self.calculation_results["project_2"][key]
+    #             difference = round(abs(our_value - student_value), 2)
+    #             status = "Совпадает" if difference <= 0.01 else "Расхождение"
+    #             rows.append([f"Проект 2: {key}", f"{our_value:.2f}", f"{student_value:.2f}", f"{difference:.2f}", status])
+    #
+    #     with open(filename, 'w', newline='', encoding='utf-8-sig') as csvfile:
+    #         writer = csv.writer(csvfile, delimiter=';')
+    #         writer.writerow(headers)
+    #         for row in rows:
+    #             writer.writerow(row)
+    #
+    #     print(f"\nОтчет проверки сохранен в файл: {filename}")
+    #
+    #     return len(mismatches)
 
 def main():
     """Основная функция"""
