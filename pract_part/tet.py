@@ -206,7 +206,7 @@ def apply_reductions(variant: int, pretty_print: bool = True):
 
 
 # Пример использования с красивой печатью (по умолчанию):
-apply_reductions(2)
+apply_reductions(3)
 
 # Если хочешь просто вернуть словарь (без печати):
 # data = apply_reductions(2, pretty_print=False)
