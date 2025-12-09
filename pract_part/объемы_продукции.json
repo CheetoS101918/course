@@ -1,21 +1,21 @@
 {
   "project_1": {
     "name": "Проект 1",
-    "commodity_output": 150024.50547,
-    "realized_output": 150774.62799735
+    "commodity_output": 188244.1863,
+    "realized_output": 189185.4072315
   },
   "project_2": {
     "name": "Проект 2",
-    "commodity_output": 162344.09772,
-    "realized_output": 163155.81820860002
+    "commodity_output": 166955.47079999998,
+    "realized_output": 167790.24815399997
   },
   "total": {
-    "total_commodity_output": 312368.60319,
-    "total_realized_output": 313930.44620595
+    "total_commodity_output": 355199.65709999995,
+    "total_realized_output": 356975.65538549994
   },
   "metadata": {
     "variant": 3,
-    "calculation_date": "2025-12-09 00:03:50",
+    "calculation_date": "2025-12-09 23:17:36",
     "currency": "тыс. руб."
   }
 }

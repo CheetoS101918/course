@@ -2,25 +2,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 from math import ceil
 
-# # Данные
-# fixed_costs = 49078.02   # Постоянные затраты (CF)
-# price_per_unit = 411.55  # Цена единицы продукции (P)
-# var_cost_per_unit = 114.515  # Переменные издержки на единицу (V)
-# break_even_qty = 287  # Точка безубыточности (Qкр)
-# project_qty = 477
-
-# КОСТЯ
-# fixed_costs = 88532.68   # Постоянные затраты (CF)
-# price_per_unit = 479.38  # Цена единицы продукции (P)
-# var_cost_per_unit = 108206.63  # Переменные издержки на единицу (V)
-# break_even_qty = 350  # Точка безубыточности (Qкр)
-# project_qty = 479
-
-# Исходные данные
-# CF = 49078.02  # постоянные расходы, тыс. руб.
-# cv_total = 114515.41  # общие переменные расходы, тыс. руб.
-# price = 411.55  # цена единицы продукции, тыс. руб.
-# Q_max = 477  # годовой объем производства, шт.
 
 #  KOSTYA
 # CF = 88532.68  # постоянные расходы, тыс. руб.
@@ -34,10 +15,10 @@ from math import ceil
 # price = 322.73  # цена единицы продукции, тыс. руб.
 # Q_max = 412  # годовой объем производства, шт.
 
-CF = 46574.12   # постоянные расходы, тыс. руб.
-cv_total = 86494.8 # общие переменные расходы, тыс. руб.
-price = 429.48  # цена единицы продукции, тыс. руб.
-Q_max = 378  # годовой объем производства, шт.
+CF = 47061.04   # постоянные расходы, тыс. руб.
+cv_total = 109809.11 # общие переменные расходы, тыс. руб.
+price = 394.64  # цена единицы продукции, тыс. руб.
+Q_max = 477  # годовой объем производства, шт.
 
 # Расчет переменных расходов на единицу продукции
 cv_unit = cv_total / Q_max
@@ -75,8 +56,8 @@ fontsize = 9.4
 # Подписи на линиях
 plt.text(Q_max * 0.7, price * Q_max * 0.8, f'Выручка', fontsize=fontsize,
          bbox=dict(facecolor='white', alpha=0.8, edgecolor='gray'))
-plt.text(Q_max * 1.1, (CF + cv_unit * Q_max * 1.5) * 0.8, f'Общие затраты',
-         fontsize=fontsize, bbox=dict(facecolor='white', alpha=0.8, edgecolor='gray'))
+#plt.text(Q_max * 1.1, (CF + cv_unit * Q_max * 1.5) * 0.8, f'Общие затраты',
+#         fontsize=fontsize, bbox=dict(facecolor='white', alpha=0.8, edgecolor='gray'))
 plt.text(Q_max * 0.9, cv_unit * Q_max * 0.9, f'Переменные затраты',
          fontsize=fontsize, bbox=dict(facecolor='white', alpha=0.8, edgecolor='gray'))
 plt.text(Q_max * 0.1, CF * 1.05, f'Постоянные затраты',
@@ -87,8 +68,10 @@ plt.text(Q_be + 5, price * Q_be + 10000, f'Точка безубыточност
          fontsize=fontsize, bbox=dict(facecolor='white', alpha=0.9, edgecolor='gray'))
 
 # Подпись для линии себестоимости (общих затрат)
-plt.text(Q_max * 0.3, CF + cv_unit * Q_max * 0.4, f'Себестоимость',
+plt.text(Q_max * 1.1, (CF + cv_unit * Q_max * 1.5) * 0.8, f'Себестоимость',
          fontsize=fontsize, bbox=dict(facecolor='white', alpha=0.8, edgecolor='gray'))
+# Q_max * 0.3, CF + cv_unit * Q_max * 0.4
+
 
 # Отметка годового объема производства
 plt.axvline(x=Q_max, color='k', linestyle='-', linewidth=1, alpha=0.7)

@@ -65,7 +65,7 @@ def show_variant_data_as_list(variant_number, file_path="dop_N_corrected.csv"):
 # --- Использование функции ---
 
 # **Введите номер варианта:**
-my_variant = 1
+my_variant = 2
 
 
 # Вызов функции для вывода данных
